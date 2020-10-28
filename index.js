@@ -1,3 +1,4 @@
+const { urlencoded } = require("express");
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -12,6 +13,9 @@ var status = {
 var uhc_data = {
   host: "aleiv",
 };
+//Body parse middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 //Returns the status of the instance as a whole
 app.get("/api/server/status", (req, res) => {
   res.json(status);
@@ -21,8 +25,9 @@ app.get("/api/server/uhc", (req, res) => {
   res.json(uhc_data);
 });
 //Should allow for data to be written.
-app.put("/api/server/uhc", (req, res) => {
-  res.json(uhc_data);
+app.post("/", (req, res) => {
+  res.send(req.body);
+  console.log("Request post");
 });
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
