@@ -103,7 +103,7 @@ async function create_server(request, response) {
   }).catch((err) => console.log(err.getBody()));
 
   response.send(request.body)
-  console.log(`Creating server for ${request.body.displayname} of type ${request.body.game_type} and extra-data ${request.body.extra_data}`)
+  console.log(`Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`)
 }
 //Auth function
 function authorized(request, respone) {
