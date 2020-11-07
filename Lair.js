@@ -6,7 +6,7 @@ const requestify = require('requestify');
 
 //Pterodactyl, Vultr, and PORT
 const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
-const PTERO_URL = "http://condor.jcedeno.us/api";
+const PTERO_URL = "http://condor.jcedeno.us/";
 const VULTR_API = "RSBCD6OMAKB6TNWS7PUBLGCLWKNTD36U7HGA";
 const PORT = 420;
 //Map to keep track of Ips and Node IDS
@@ -72,7 +72,7 @@ async function create_server(request, response) {
     await sleep(1000);
     ip = await obtain_ip_from_subid(id);
   }
-  requestify.request(PTERO_URL + "/application/nodes", {
+  requestify.request(PTERO_URL + "api/application/nodes", {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${PTERO_API}`,
