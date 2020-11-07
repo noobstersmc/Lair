@@ -33,12 +33,12 @@ app.post("/create-server", (req, res) => {
 //Get call to obtain self register
 app.get("/self-register", (req, res) => {
   if (authorized(req, res)) {
-    find_self_register_from_ip(req, res);
+    find_self_register_from_ip(req, refis);
   }
 
 });
 app.get("/vultr/sizes", (req, res) => {
-  console.lof("Size request of" + req.body)
+  console.log("Size request of" + req.body)
   get_sizes().then((result) => {
 
     res.send(result);
