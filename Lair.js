@@ -37,15 +37,18 @@ app.get("/self-register", (req, res) => {
   }
 
 });
-app.get("/vultr/sizes", (req, res) =>{
-  var i = await get_sizes();
+app.get("/vultr/sizes", (req, res) => {
+  console.lof("Size request of" + req.body)
+  get_sizes().then((result) => {
 
-  res.send(i);
+    res.send(result);
+  });
+
 });
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
 //Async function to get vultr available sizes
-async function get_sizes(){
+async function get_sizes() {
   var promise = vultr.plans.list();
   let result = await promise;
   return result;
