@@ -51,6 +51,13 @@ app.get("/vultr/locations", (req, res) => {
     console.log("Done.")
   });
 });
+app.get("/vultr/servers", (req, res) => {
+  console.log("Recieved request of active server list")
+  vultr.server.list().then((result)=>{
+    res.send(result);
+    console.log("Done.")
+  });
+});
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
 //Async function to get vultr available sizes
