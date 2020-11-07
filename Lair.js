@@ -38,7 +38,8 @@ app.get("/self-register", (req, res) => {
 
 });
 app.get("/vultr/sizes", (req, res) =>{
-  res.send(get_sizes());
+  let sizes = await get_sizes();
+  res.send(sizes);
 });
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
