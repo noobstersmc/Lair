@@ -37,6 +37,10 @@ app.get("/self-register", (req, res) => {
   }
 
 });
+app.get("/vultr/sizes", (req, res) =>{
+  let sizes = await vultr.plans.list();
+  res.send(sizes);
+});
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
 //Function to obtain self-register
