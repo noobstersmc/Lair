@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.17.1"
+    "@vultr/vultr-node": "^1.0.1",
+    "express": "^4.17.1",
+    "request": "^2.88.2",
+    "requestify": "^0.2.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
