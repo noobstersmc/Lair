@@ -6,8 +6,6 @@
   "dependencies": {
     "@vultr/vultr-node": "^1.0.1",
     "express": "^4.17.1",
-    "nexe": "^3.3.7",
-    "request": "^2.88.2",
     "requestify": "^0.2.5"
   },
   "devDependencies": {
