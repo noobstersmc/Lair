@@ -175,7 +175,7 @@ function create_vultr_json(name) {
     OSID: 352,
     label: name,
     SCRIPTID: 754163,
-    VPSPLANID: 202,
+    VPSPLANID: 403,
     SSHKEYID:
       "5e23537673453,5ed1290013c2e,5ed1290013c2e,5f68c34ac21bc"
   }
