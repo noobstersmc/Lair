@@ -38,11 +38,16 @@ app.get("/self-register", (req, res) => {
 
 });
 app.get("/vultr/sizes", (req, res) =>{
-  let sizes = await vultr.plans.list();
-  res.send(sizes);
+  res.send(get_sizes());
 });
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
+//Async function to get vultr available sizes
+async function get_sizes(){
+  var promise = vultr.plans.list();
+  let result = await promise;
+  return result;
+}
 //Function to obtain self-register
 function find_self_register_from_ip(req, res) {
   let body = req.body;
