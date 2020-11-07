@@ -38,12 +38,18 @@ app.get("/self-register", (req, res) => {
 
 });
 app.get("/vultr/sizes", (req, res) => {
-  console.log("Size request of" + req.body)
+  console.log("Processing request of vultr sizes...")
   get_sizes().then((result) => {
-
     res.send(result);
+    console.log("Done.")
   });
-
+});
+app.get("/vultr/locations", (req, res) => {
+  console.log("Recieved request of locations list")
+  vultr.regions.list().then((result)=>{
+    res.send(result);
+    console.log("Done.")
+  });
 });
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
