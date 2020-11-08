@@ -325,11 +325,11 @@ function verify_instance_input(instance_type, game_type) {
     let id = response.plan_id;
     //Get the resources
     if (id == 203 || id == 402) {
-      response.ram = 4_000;
-      response.disk = id == 203 ? 80_000 : 128_000;
+      response.ram = 4000;
+      response.disk = id == 203 ? 80000 : 128000;
     } else if (id == 204 || id == 403) {
-      response.ram = 8_000;
-      response.disk = id == 204 ? 55_000 : 256_000;
+      response.ram = 8000;
+      response.disk = id == 204 ? 55000 : 256000;
     }
     return response;
   }
