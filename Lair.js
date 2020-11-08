@@ -207,17 +207,20 @@ async function create_server(request, response) {
       map.set(ip, body.attributes.id);
       add_ip(update_url, ip).then((result) => {
         //Create a server with all the data in pterodactyl
-        get_allocation_from_ip(ip).then((allocation_id) => {
+        get_allocation_from_ip(update_url, ip, 25565).then((allocation_id) => {
           if (allocation_id == undefined) {
-            console.log(`No allocation if found for ${ip}`);
+            console.log(`No allocation ip found for ${ip}`);
           } else {
+            //TODO: Dont actually request the server until the daemon is online
             create_game_server_ptero(
               request.body,
               instance_input,
               allocation_id
-            ).then((game_server_creation) => {
-              console.log("created");
-            });
+            )
+              .then((game_server_creation) => {
+                console.log("created ");
+              })
+              .catch((err) => console.log(err));
           }
         });
       });
@@ -235,8 +238,10 @@ async function create_game_server_ptero(
   instance_input,
   allocation_id
 ) {
+  let ping = requestify.request('')
+
   let promise = requestify.request(`${PTERO_URL}api/application/servers`, {
-    method: POST,
+    method: "POST",
     headers: {
       Authorization: `Bearer ${PTERO_API}`,
       "Content-Type": "application/json",
@@ -279,7 +284,7 @@ async function create_game_server_ptero(
 
 async function get_allocation_from_ip(node_url, from_ip, port) {
   var promise = requestify.request(`${node_url}/allocations`, {
-    request: "GET",
+    method: "GET",
     dataType: "json",
     headers: {
       Authorization: `Bearer ${PTERO_API}`,
@@ -288,13 +293,15 @@ async function get_allocation_from_ip(node_url, from_ip, port) {
   let result = await promise;
   let list = result.getBody().data;
   //Filter the allocation
+  var id = 0;
   list.forEach((allocation) => {
     let attributes = allocation.attributes;
     if (attributes.ip == from_ip && attributes.port == port) {
       console.log(`ID for ${from_ip}:${port} is ${attributes.id}`);
-      return attributes.id;
+      id = attributes.id;
     }
   });
+  return id;
 }
 async function verify_availability(response) {
   var promise = vultr.regions.availability({ DCID: response.region_id });
