@@ -205,15 +205,22 @@ async function create_server(request, response) {
       var update_url = body.meta.resource;
       //Save the ip in map for /self-register
       map.set(ip, body.attributes.id);
-      var p =  create_allocation_node(update_url, ip);
-      await p;
-      //Create a server with all the data in pterodactyl
-      let allocation_id = await get_allocation_from_ip(ip);
-      if(allocation_id == undefined){
-        console.log(`No allocation if found for ${ip}`);
-      }else{
-        await create_game_server_ptero(request.body, instance_input, allocation_id);
-      }
+      add_ip(update_url, ip).then((result) => {
+        //Create a server with all the data in pterodactyl
+        get_allocation_from_ip(ip).then((allocation_id) => {
+          if (allocation_id == undefined) {
+            console.log(`No allocation if found for ${ip}`);
+          } else {
+            create_game_server_ptero(
+              request.body,
+              instance_input,
+              allocation_id
+            ).then((game_server_creation) => {
+              console.log("created");
+            });
+          }
+        });
+      });
     })
     .catch((err) => console.log(err.getBody()));
 
@@ -223,9 +230,12 @@ async function create_server(request, response) {
   );
 }
 
-async function create_game_server_ptero(request_body, instance_input, allocation_id){
-  let promise = requestify
-  .request(`${PTERO_URL}api/application/servers`, {
+async function create_game_server_ptero(
+  request_body,
+  instance_input,
+  allocation_id
+) {
+  let promise = requestify.request(`${PTERO_URL}api/application/servers`, {
     method: POST,
     headers: {
       Authorization: `Bearer ${PTERO_API}`,
@@ -235,10 +245,9 @@ async function create_game_server_ptero(request_body, instance_input, allocation
     body: {
       name: request_body.host,
       user: 1,
-      egg: request_body.game_type == 'UHC' ? 15 : 16,
+      egg: request_body.game_type == "UHC" ? 15 : 16,
       docker_image: "noobstersmc/condor-graal:1.0",
-      startup:
-        "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+      startup: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
       limits: {
         memory: instance_input.ram,
         swap: 0,
@@ -358,6 +367,23 @@ function authorized(request, respone) {
   }
   return true;
 }
+async function add_ip(url, ipv4) {
+  let promise = requestify.request(`${url}/allocations`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${PTERO_API}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: {
+      ip: ipv4,
+      ports: ["25565", "8081"],
+    },
+    dataType: "json",
+  });
+  let result = await promise;
+  return "completed";
+}
 async function obtain_ip_from_subid(id) {
   var promise = vultr.server.list({
     SUBID: id,
@@ -370,25 +396,6 @@ function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-async function create_allocation_node(url, ipv4) {
-  let promise = requestify
-    .request(`${url}/allocations`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${PTERO_API}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: {
-        ip: ipv4,
-        ports: ["25565", "8081"],
-      },
-      dataType: "json",
-    });
-  let result = await promise;
-  console.log('Result: ' + result);
-  return result;
 }
 
 function create_vultr_json(name, id = 403, region = 1) {
