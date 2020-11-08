@@ -238,7 +238,6 @@ async function create_game_server_ptero(
   instance_input,
   allocation_id
 ) {
-  let ping = requestify.request('')
 
   let promise = requestify.request(`${PTERO_URL}api/application/servers`, {
     method: "POST",
