@@ -387,6 +387,7 @@ async function create_allocation_node(url, ipv4) {
     });
   let result = await promise;
   console.log('Result: ' + result);
+  return result;
 }
 
 function create_vultr_json(name, id = 403, region = 1) {
