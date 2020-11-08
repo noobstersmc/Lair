@@ -210,18 +210,8 @@ async function create_server(request, response) {
         get_allocation_from_ip(update_url, ip, 25565).then((allocation_id) => {
           if (allocation_id == undefined) {
             console.log(`No allocation ip found for ${ip}`);
-          } else {
-            //TODO: Dont actually request the server until the daemon is online
-            create_game_server_ptero(
-              request.body,
-              instance_input,
-              allocation_id
-            )
-              .then((game_server_creation) => {
-                console.log("created ");
-              })
-              .catch((err) => console.log(err));
           }
+          create_game_server_ptero(request.body, instance_input, allocation_id);
         });
       });
     })
@@ -232,13 +222,11 @@ async function create_server(request, response) {
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
   );
 }
-
 async function create_game_server_ptero(
   request_body,
   instance_input,
   allocation_id
 ) {
-
   let promise = requestify.request(`${PTERO_URL}api/application/servers`, {
     method: "POST",
     headers: {
@@ -277,8 +265,14 @@ async function create_game_server_ptero(
     },
     dataType: "json",
   });
-  let result = await promise;
-  console.log(result);
+  try {
+    let result = await promise;
+    console.log(result);
+    
+  } catch (error) {
+    console.log('Error found');
+    
+  }
 }
 
 async function get_allocation_from_ip(node_url, from_ip, port) {
