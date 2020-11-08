@@ -205,7 +205,8 @@ async function create_server(request, response) {
       var update_url = body.meta.resource;
       //Save the ip in map for /self-register
       map.set(ip, body.attributes.id);
-      await create_allocation_node(update_url, ip);
+      var p =  create_allocation_node(update_url, ip);
+      await p;
       //Create a server with all the data in pterodactyl
       let allocation_id = await get_allocation_from_ip(ip);
       if(allocation_id == undefined){
