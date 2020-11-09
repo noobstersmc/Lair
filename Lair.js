@@ -177,48 +177,24 @@ async function create_server(request, response) {
     ip = await obtain_ip_from_subid(id);
   }
   //Register the node in pterodactyl
-  requestify
-    .request(PTERO_URL + "api/application/nodes", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${PTERO_API}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: {
-        name: `${request.body.host}`,
-        location_id: 1,
-        fqdn: ip,
-        scheme: "http",
-        memory: instance_input.ram,
-        disk: instance_input.disk,
-        disk_overallocate: 0,
-        memory_overallocate: 0,
-        upload_size: 100,
-        daemon_sftp: 2022,
-        daemon_listen: 8080,
-      },
-      dataType: "json",
-    })
-    .then((res) => {
-      let body = res.getBody();
-      var update_url = body.meta.resource;
-      //Save the ip in map for /self-register
-      map.set(ip, body.attributes.id);
-      add_ip(update_url, ip).then((result) => {
-        //Create a server with all the data in pterodactyl
-        get_allocation_from_ip(update_url, ip, 25565).then((allocation_id) => {
-          if (allocation_id == undefined) {
-            console.log(`No allocation ip found for ${ip}`);
-          }
-          let time = 1000 * 4 * 60;
-          await sleep(time);
+  var node_create = el(request, instance_input);
+  let node_result = await node_create;
 
-          create_game_server_ptero(request.body, instance_input, allocation_id);
-        });
-      });
-    })
-    .catch((err) => console.log(err.getBody()));
+  let body = node_result.getBody();
+  map.set(ip, body.attributes.id);
+  var update_url = body.meta.resource;
+  //Allocate the ips
+  var node_ip_allocation = add_ip(update_url, ip);
+  await node_ip_allocation;
+  //Create the request to
+  var get_ip_id = get_allocation_from_ip(update_url, ip, 25565);
+  let allocation_id = await get_ip_id;
+  if (allocation_id == undefined) {
+    console.log(`No allocation ip found for ${ip}`);
+  }
+  setTimeout(()=>{
+    create_game_server_ptero(request.body, instance_input, allocation_id);
+  }, 180000)
 
   response.send(request.body);
   console.log(
@@ -270,10 +246,8 @@ async function create_game_server_ptero(
   try {
     let result = await promise;
     console.log(result);
-    
   } catch (error) {
-    console.log('Error found');
-    
+    console.log("Error found");
   }
 }
 
@@ -385,6 +359,32 @@ async function add_ip(url, ipv4) {
   });
   let result = await promise;
   return "completed";
+}
+async function el(request, instance_input) {
+  var promise = requestify.request(PTERO_URL + "api/application/nodes", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${PTERO_API}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: {
+      name: `${request.body.host}`,
+      location_id: 1,
+      fqdn: ip,
+      scheme: "http",
+      memory: instance_input.ram,
+      disk: instance_input.disk,
+      disk_overallocate: 0,
+      memory_overallocate: 0,
+      upload_size: 100,
+      daemon_sftp: 2022,
+      daemon_listen: 8080,
+    },
+    dataType: "json",
+  });
+  let result = await promise;
+  return result;
 }
 async function obtain_ip_from_subid(id) {
   var promise = vultr.server.list({
