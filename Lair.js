@@ -211,6 +211,9 @@ async function create_server(request, response) {
           if (allocation_id == undefined) {
             console.log(`No allocation ip found for ${ip}`);
           }
+
+          await sleep(1000 * (60*4));
+
           create_game_server_ptero(request.body, instance_input, allocation_id);
         });
       });
@@ -251,7 +254,6 @@ async function create_game_server_ptero(
         databases: 0,
         backups: 0,
       },
-      //NO IDEA WHAT ALLOCATION IS
       allocation: {
         default: allocation_id,
       },
