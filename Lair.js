@@ -201,7 +201,7 @@ async function create_server(request, response) {
       allocation_id
     );
     game_server_promise.then((x) => {
-      console.log(x.getBody());
+      console.log(x);
     });
   }, 180000);
 
