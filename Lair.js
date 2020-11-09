@@ -192,17 +192,19 @@ async function create_server(request, response) {
   if (allocation_id == undefined) {
     console.log(`No allocation ip found for ${ip}`);
   }
-  response.send(request.body);
-  console.log(
-    `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
-  );
-  
+
   setTimeout(() => {
     console.log("Coso");
     var game_server_promise = create_game_server_ptero(request.body, instance_input, allocation_id);
     let game_server_result = await game_server_promise;
     console.log(game_server_result.getBody());
   }, 180000);
+  
+  response.send(request.body);
+  console.log(
+    `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
+  );
+  
 
 }
 async function create_game_server_ptero(
