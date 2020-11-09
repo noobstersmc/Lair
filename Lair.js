@@ -195,17 +195,20 @@ async function create_server(request, response) {
 
   setTimeout(() => {
     console.log("Coso");
-    var game_server_promise = create_game_server_ptero(request.body, instance_input, allocation_id);
-    let game_server_result = await game_server_promise;
-    console.log(game_server_result.getBody());
+    var game_server_promise = create_game_server_ptero(
+      request.body,
+      instance_input,
+      allocation_id
+    );
+    game_server_promise.then((x) => {
+      console.log(x.getBody());
+    });
   }, 180000);
-  
+
   response.send(request.body);
   console.log(
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
   );
-  
-
 }
 async function create_game_server_ptero(
   request_body,
@@ -251,7 +254,7 @@ async function create_game_server_ptero(
   });
   try {
     let result = await promise;
-    console.log(result);
+    return result;
   } catch (error) {
     console.log("Error found");
   }
