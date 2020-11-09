@@ -193,7 +193,10 @@ async function create_server(request, response) {
     console.log(`No allocation ip found for ${ip}`);
   }
   setTimeout(() => {
-    create_game_server_ptero(request.body, instance_input, allocation_id);
+    console.log("Coso");
+    var game_server_promise = create_game_server_ptero(request.body, instance_input, allocation_id);
+    let game_server_result = await game_server_promise;
+    console.log(game_server_result);
   }, 180000);
 
   response.send(request.body);
