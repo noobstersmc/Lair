@@ -177,7 +177,7 @@ async function create_server(request, response) {
     ip = await obtain_ip_from_subid(id);
   }
   //Register the node in pterodactyl
-  var node_create = el(request, instance_input);
+  var node_create = el(request, instance_input, ip);
   let node_result = await node_create;
 
   let body = node_result.getBody();
@@ -192,9 +192,9 @@ async function create_server(request, response) {
   if (allocation_id == undefined) {
     console.log(`No allocation ip found for ${ip}`);
   }
-  setTimeout(()=>{
+  setTimeout(() => {
     create_game_server_ptero(request.body, instance_input, allocation_id);
-  }, 180000)
+  }, 180000);
 
   response.send(request.body);
   console.log(
@@ -360,7 +360,7 @@ async function add_ip(url, ipv4) {
   let result = await promise;
   return "completed";
 }
-async function el(request, instance_input) {
+async function el(request, instance_input, ip) {
   var promise = requestify.request(PTERO_URL + "api/application/nodes", {
     method: "POST",
     headers: {
