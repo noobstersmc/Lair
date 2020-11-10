@@ -201,7 +201,6 @@ async function create_server(request, response) {
   }
 
   setTimeout(() => {
-    console.log("Coso");
     var game_server_promise = create_game_server_ptero(
       request.body,
       instance_input,
@@ -211,7 +210,7 @@ async function create_server(request, response) {
     game_server_promise.then((x) => {
       console.log(x);
     });
-  }, 60000);
+  }, 120000);
 
   response.send(request.body);
   console.log(
@@ -224,7 +223,7 @@ async function create_game_server_ptero(
   allocation_id,
   additional
 ) {
-  var count = 0;
+  var count = 1;
   while (count++ <= 10) {
     try {
       let result = await requestify.request(
@@ -268,7 +267,8 @@ async function create_game_server_ptero(
       );
       return result;
     } catch (error) {
-      console.log(`Error found ${count}/10`);
+      console.log(`Error found ${count-1}/10`);
+      console.log(error)
     }
     await sleep(10000);
   }
