@@ -211,7 +211,7 @@ async function create_server(request, response) {
     game_server_promise.then((x) => {
       console.log(x);
     });
-  }, 120000);
+  }, 50000);
 
   response.send(request.body);
   console.log(
@@ -259,12 +259,16 @@ async function create_game_server_ptero(
     },
     dataType: "json",
   });
-  try {
-    let result = await promise;
-    return result;
-  } catch (error) {
-    console.log("Error found");
+  var count = 0;
+  while (count++ <= 10) {
+    try {
+      let result = await promise;
+      return result;
+    } catch (error) {
+      console.log(`Error found ${count}/10`);
+    }
   }
+  return "Error: Could not create server";
 }
 
 async function get_allocation_from_ip(node_url, from_ip, port) {
