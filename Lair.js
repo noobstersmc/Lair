@@ -260,6 +260,7 @@ async function create_game_server_ptero(
             //ENVIRONMENT
             environment: {
               GAME_SEED: request_body.extra_data.level_seed,
+              SERVER_JARFILE: "server.jar",
             },
           },
           dataType: "json",
@@ -267,8 +268,8 @@ async function create_game_server_ptero(
       );
       return result;
     } catch (error) {
-      console.log(`Error found ${count-1}/10`);
-      console.log(error)
+      console.log(`Error found ${count - 1}/10`);
+      console.log(error);
     }
     await sleep(10000);
   }
