@@ -56,10 +56,14 @@ app.get("/vultr/servers", (req, res) => {
   });
 });
 let vultr_api_url = "https://api.vultr.com/v2/";
-app.get("/vultr/servers/v2", (req, res) => {
+app.get("/vultr/servers/v2", (req, res) => process_get_cv_cmd(req.query.ip, res));
+//
+
+function process_get_cv_cmd(ip, res){
+
   console.log("Recieved request of active server list");
   //Call to the vultr v2 api rest
-  let input = req.query.ip;
+  let input = ip;
   console.log(input);
   if (input == null) {
     res.sendStatus(400);
@@ -106,12 +110,11 @@ app.get("/vultr/servers/v2", (req, res) => {
           return;
         }
       });
-      console.log(req.params.ip);
 
       res.sendStatus(404);
     });
-});
-//
+
+}
 
 //Starts the app
 app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
@@ -212,6 +215,7 @@ async function create_server(request, response) {
     });
   }, 120000);
 
+  process_get_cv_cmd(ip, res);
   response.send(request.body);
   console.log(
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
