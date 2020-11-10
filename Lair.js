@@ -53,11 +53,12 @@ app.get("/vultr/servers", (req, res) => {
   });
 });
 let vultr_api_url = "https://api.vultr.com/v2/";
-app.get("/vultr/servers/v2", (req, res) => process_get_cv_cmd(req.query.ip, res));
+app.get("/vultr/servers/v2", (req, res) =>
+  process_get_cv_cmd(req.query.ip, res)
+);
 //
 
-function process_get_cv_cmd(ip, res){
-
+function process_get_cv_cmd(ip, res) {
   console.log("Recieved request of active server list");
   //Call to the vultr v2 api rest
   let input = ip;
@@ -110,7 +111,6 @@ function process_get_cv_cmd(ip, res){
 
       res.sendStatus(404);
     });
-
 }
 
 //Starts the app
@@ -434,6 +434,5 @@ function create_vultr_json(name, id = 403, region = 1) {
     label: name,
     SCRIPTID: 754163,
     VPSPLANID: id,
-    SSHKEYID: "5e23537673453,5ed1290013c2e,5ed1290013c2e,5f68c34ac21bc",
   };
 }
