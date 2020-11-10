@@ -7,13 +7,10 @@ const requestify = require("requestify");
 //Pterodactyl, Vultr, and PORT
 const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
 const PTERO_URL = "http://condor.jcedeno.us/";
-const VULTR_API = "RSBCD6OMAKB6TNWS7PUBLGCLWKNTD36U7HGA";
+const VULTR_API = "6BVHW5PVJ53WDFIOT77GPXN2L6K4IZOI5PKQ";
 const PORT = 420;
 //Map to keep track of Ips and Node IDS
 const map = new Map();
-//Test Values
-map.set("69", 420);
-map.set("72.184.69.100", 100);
 //Vultr Api
 const VultrNode = require("@vultr/vultr-node");
 const vultr = VultrNode.initialize({
