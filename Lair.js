@@ -211,7 +211,7 @@ async function create_server(request, response) {
     game_server_promise.then((x) => {
       console.log(x);
     });
-  }, 180000);
+  }, 120000);
 
   response.send(request.body);
   console.log(
