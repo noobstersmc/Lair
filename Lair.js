@@ -267,6 +267,8 @@ async function create_game_server_ptero(
     } catch (error) {
       console.log(`Error found ${count}/10`);
     }
+    await sleep(10000);
+    
   }
   return "Error: Could not create server";
 }
