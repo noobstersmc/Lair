@@ -215,8 +215,7 @@ async function create_server(request, response) {
     });
   }, 120000);
 
-  process_get_cv_cmd(ip, res);
-  response.send(request.body);
+  process_get_cv_cmd(ip, response);
   console.log(
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
   );
