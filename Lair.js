@@ -188,9 +188,14 @@ async function create_server(request, response) {
   await node_ip_allocation;
   //Create the request to
   var get_ip_id = get_allocation_from_ip(update_url, ip, 25565);
+  var get_server_socket_ip_id = get_allocation_from_ip(update_url, ip, 8081);
   let allocation_id = await get_ip_id;
+  let server_socket_id = await get_server_socket_ip_id;
   if (allocation_id == undefined) {
-    console.log(`No allocation ip found for ${ip}`);
+    console.log(`No allocation ip found for ${ip}:25565`);
+  }
+  if (server_socket_id == undefined) {
+    console.log(`No allocation ip found for ${ip}:8081`);
   }
 
   setTimeout(() => {
@@ -241,6 +246,7 @@ async function create_game_server_ptero(
       },
       allocation: {
         default: allocation_id,
+        additional:[server_socket_id]
       },
       //ENVIRONMENT
       environment: {
