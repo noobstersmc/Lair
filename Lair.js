@@ -184,18 +184,20 @@ async function create_server(request, response) {
   map.set(ip, body.attributes.id);
   var update_url = body.meta.resource;
   //Allocate the ips
-  var node_ip_allocation = add_ip(update_url, ip);
-  await node_ip_allocation;
+  await add_ip(update_url, ip);
   //Create the request to
   var get_ip_id = get_allocation_from_ip(update_url, ip, 25565);
   var get_server_socket_ip_id = get_allocation_from_ip(update_url, ip, 8081);
   let allocation_id = await get_ip_id;
   let server_socket_id = await get_server_socket_ip_id;
+  let additional = [];
   if (allocation_id == undefined) {
     console.log(`No allocation ip found for ${ip}:25565`);
   }
   if (server_socket_id == undefined) {
     console.log(`No allocation ip found for ${ip}:8081`);
+  } else {
+    additional.push(server_socket_id);
   }
 
   setTimeout(() => {
@@ -203,7 +205,8 @@ async function create_server(request, response) {
     var game_server_promise = create_game_server_ptero(
       request.body,
       instance_input,
-      allocation_id
+      allocation_id,
+      additional
     );
     game_server_promise.then((x) => {
       console.log(x);
@@ -218,7 +221,8 @@ async function create_server(request, response) {
 async function create_game_server_ptero(
   request_body,
   instance_input,
-  allocation_id
+  allocation_id,
+  additional
 ) {
   let promise = requestify.request(`${PTERO_URL}api/application/servers`, {
     method: "POST",
@@ -246,7 +250,7 @@ async function create_game_server_ptero(
       },
       allocation: {
         default: allocation_id,
-        additional:[server_socket_id]
+        additional,
       },
       //ENVIRONMENT
       environment: {
@@ -297,13 +301,15 @@ function verify_instance_input(instance_type, game_type) {
     response.plan_id = plan_id_from_description(instance_type.plan);
     if (response.plan_id == undefined) {
       response.plan_id = game_type == "UHC" ? 403 : 402;
-      console.log(`${instance_type.plan} is undefined`);
+      console.log(
+        `Plan_id ${instance_type.plan} is undefined, using ${response.plan_id}`
+      );
     }
     //Obtain a region ID understandable by vultr api
     response.region_id = region_id_from_name(instance_type.region);
     if (response.region_id == undefined) {
-      console.log(`${instance_type.plan} is undefined`);
       response.region_id = 1;
+      console.log(`Region is undefined, using ${response.region_id}`);
     }
     //Auto change to the only available instance in frnace
     if (response.region_id == 24) {
@@ -369,7 +375,7 @@ async function add_ip(url, ipv4) {
     },
     dataType: "json",
   });
-  let result = await promise;
+  await promise;
   return "completed";
 }
 async function el(request, instance_input, ip) {
