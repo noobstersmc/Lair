@@ -224,51 +224,53 @@ async function create_game_server_ptero(
   allocation_id,
   additional
 ) {
-  let promise = requestify.request(`${PTERO_URL}api/application/servers`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${PTERO_API}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: {
-      name: request_body.host,
-      user: 1,
-      egg: request_body.game_type == "UHC" ? 15 : 16,
-      docker_image: "noobstersmc/condor-graal:1.0",
-      startup: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
-      limits: {
-        memory: instance_input.ram,
-        swap: 0,
-        disk: 0,
-        cpu: 0,
-        io: 500,
-      },
-      feature_limits: {
-        databases: 0,
-        backups: 0,
-      },
-      allocation: {
-        default: allocation_id,
-        additional,
-      },
-      //ENVIRONMENT
-      environment: {
-        GAME_SEED: request_body.extra_data.level_seed,
-      },
-    },
-    dataType: "json",
-  });
   var count = 0;
   while (count++ <= 10) {
     try {
-      let result = await promise;
+      let result = await requestify.request(
+        `${PTERO_URL}api/application/servers`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${PTERO_API}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: {
+            name: request_body.host,
+            user: 1,
+            egg: request_body.game_type == "UHC" ? 15 : 16,
+            docker_image: "noobstersmc/condor-graal:1.0",
+            startup:
+              "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+            limits: {
+              memory: instance_input.ram,
+              swap: 0,
+              disk: 0,
+              cpu: 0,
+              io: 500,
+            },
+            feature_limits: {
+              databases: 0,
+              backups: 0,
+            },
+            allocation: {
+              default: allocation_id,
+              additional,
+            },
+            //ENVIRONMENT
+            environment: {
+              GAME_SEED: request_body.extra_data.level_seed,
+            },
+          },
+          dataType: "json",
+        }
+      );
       return result;
     } catch (error) {
       console.log(`Error found ${count}/10`);
     }
     await sleep(10000);
-    
   }
   return "Error: Could not create server";
 }
