@@ -244,10 +244,7 @@ async function create_game_server_ptero(
       },
       //ENVIRONMENT
       environment: {
-        SERVER_JARFILE: "server.jar",
         GAME_SEED: request_body.extra_data.level_seed,
-        DL_PATH:
-          "https://ci.codemc.io/job/YatopiaMC/job/Yatopia/job/ver%252F1.16.3/lastSuccessfulBuild/artifact/target/yatopia-1.16.3-paperclip-b134.jar",
       },
     },
     dataType: "json",
