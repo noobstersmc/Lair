@@ -332,6 +332,22 @@ async function start_server_when_installed(identifier) {
       .then((result) => {
         console.log("Request completed");
       });
+      requestify
+        .request(`${PTERO_URL}api/client/servers/${identifier}/command`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${PTERO_CLIENT}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: {
+            command: "worldload",
+          },
+          dataType: "json",
+        })
+        .then((result) => {
+          console.log("Request completed");
+        });
   }else{
     console.log('Could not complete the request')
   }
