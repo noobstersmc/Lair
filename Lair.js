@@ -292,10 +292,8 @@ async function start_server_when_installed(identifier) {
           method: "GET",
           headers: {
             Authorization: `Bearer ${PTERO_CLIENT}`,
-            "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: {},
           dataType: "json",
         }
       );
