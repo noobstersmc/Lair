@@ -348,7 +348,7 @@ async function start_server_when_installed(identifier) {
           dataType: "json",
         })
         .then((result) => {
-          console.log("Request completed");
+          console.log("Sent worldload command");
         });
   }else{
     console.log('Could not complete the request')
