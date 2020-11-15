@@ -211,7 +211,7 @@ async function create_server(request, response) {
     game_server_promise.then((x) => {
       console.log(x);
     });
-  }, 120000);
+  }, 100000);
 
   process_get_cv_cmd(ip, response);
   console.log(
@@ -332,6 +332,8 @@ async function start_server_when_installed(identifier) {
       .then((result) => {
         console.log("Request completed");
       });
+
+      await sleep(20000);
       requestify
         .request(`${PTERO_URL}api/client/servers/${identifier}/command`, {
           method: "POST",
