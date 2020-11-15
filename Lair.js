@@ -300,16 +300,17 @@ async function start_server_when_installed(identifier) {
       var result_body = result.getBody();
       console.log(result_body);
       var is_installing = result_body.attributes.is_installing;
-      if (is_installing == "false") {
+      if (is_installing == false) {
+        console.log('Finalized instalation...')
         installed = true;
         break;
       }
 
-      await sleep(5000);
+      await sleep(10000);
     } catch (error) {
       console.log(`Error trying to start ${count - 1}/30`);
 
-      await sleep(5000);
+      await sleep(10000);
       console.log(error);
     }
   }
