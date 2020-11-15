@@ -6,6 +6,7 @@ const requestify = require("requestify");
 
 //Pterodactyl, Vultr, and PORT
 const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
+const PTERO_CLIENT = "jEe5HgYTe8hQZEx3JikPTa5RTd0Ou8hGkJWgotu1FgsMTkue";
 const PTERO_URL = "http://condor.jcedeno.us/";
 const VULTR_API = "6BVHW5PVJ53WDFIOT77GPXN2L6K4IZOI5PKQ";
 const PORT = 420;
@@ -266,6 +267,10 @@ async function create_game_server_ptero(
           dataType: "json",
         }
       );
+      var last_response = result.getBody();
+      var identifier = last_response.attributes.identifier;
+      start_server_when_installed(identifier);
+
       return result;
     } catch (error) {
       console.log(`Error found ${count - 1}/10`);
@@ -274,6 +279,63 @@ async function create_game_server_ptero(
     await sleep(10000);
   }
   return "Error: Could not create server";
+}
+
+async function start_server_when_installed(identifier) {
+  var count = 1;
+  var installed = false;
+  while (count++ <= 50) {
+    try {
+      let result = await requestify.request(
+        `${PTERO_URL}api/client/servers/${identifier}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${PTERO_CLIENT}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: {},
+          dataType: "json",
+        }
+      );
+      var result_body = result.getBody();
+      console.log(result_body);
+      var is_installing = result_body.attributes.is_installing;
+      if (is_installing == "false") {
+        installed = true;
+        break;
+      }
+
+      await sleep(5000);
+    } catch (error) {
+      console.log(`Error trying to start ${count - 1}/30`);
+
+      await sleep(5000);
+      console.log(error);
+    }
+  }
+  if (installed) {
+    console.log("Starting the uhc server");
+    requestify
+      .request(`${PTERO_URL}api/client/servers/${identifier}/power`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${PTERO_CLIENT}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: {
+          signal: "start",
+        },
+        dataType: "json",
+      })
+      .then((result) => {
+        console.log("Request completed");
+      });
+  }else{
+    console.log('Could not complete the request')
+  }
 }
 
 async function get_allocation_from_ip(node_url, from_ip, port) {
