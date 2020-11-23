@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: false }));
 //Should allow for data to be written.
 app.post("/create-server", (req, res) => {
   if (authorized(req, res)) {
+    console.log(req.body)
     create_server(req, res);
   }
 });
@@ -157,6 +158,7 @@ async function create_server(request, response) {
     });
     return;
   }
+  
   //Create a promise to await for the vultr server to be ready.
   let creation_promise = vultr.server.create(
     create_vultr_json(
@@ -200,29 +202,34 @@ async function create_server(request, response) {
   } else {
     additional.push(server_socket_id);
   }
+  
+
+  var condor_id = createUniqueGameNumber();
 
   setTimeout(() => {
     var game_server_promise = create_game_server_ptero(
       request.body,
       instance_input,
       allocation_id,
-      additional
+      additional,
+      condor_id
     );
     game_server_promise.then((x) => {
       console.log(x);
     });
   }, 100000);
 
-  process_get_cv_cmd(ip, response);
+  response.send({ condor_id });
   console.log(
-    `Creating server for ${request.body.displayname} of type ${request.body.game_type} and seed ${request.body.extra_data.level_seed}`
+    `Creating server for ${request.body.displayname} of type ${request.body.game_type} and id ${condor_id}`
   );
 }
 async function create_game_server_ptero(
   request_body,
   instance_input,
   allocation_id,
-  additional
+  additional,
+  condor_id
 ) {
   var count = 1;
   while (count++ <= 10) {
@@ -262,6 +269,7 @@ async function create_game_server_ptero(
             environment: {
               GAME_SEED: request_body.extra_data.level_seed,
               SERVER_JARFILE: "server.jar",
+              condor_id
             },
           },
           dataType: "json",
@@ -301,7 +309,7 @@ async function start_server_when_installed(identifier) {
       console.log(result_body);
       var is_installing = result_body.attributes.is_installing;
       if (is_installing == false) {
-        console.log('Finalized instalation...')
+        console.log("Finalized instalation...");
         installed = true;
         break;
       }
@@ -333,25 +341,25 @@ async function start_server_when_installed(identifier) {
         console.log("Request completed");
       });
 
-      await sleep(20000);
-      requestify
-        .request(`${PTERO_URL}api/client/servers/${identifier}/command`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${PTERO_CLIENT}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: {
-            command: "worldload",
-          },
-          dataType: "json",
-        })
-        .then((result) => {
-          console.log("Sent worldload command");
-        });
-  }else{
-    console.log('Could not complete the request')
+    await sleep(20000);
+    requestify
+      .request(`${PTERO_URL}api/client/servers/${identifier}/command`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${PTERO_CLIENT}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: {
+          command: "worldload",
+        },
+        dataType: "json",
+      })
+      .then((result) => {
+        console.log("Sent worldload command");
+      });
+  } else {
+    console.log("Could not complete the request");
   }
 }
 
@@ -514,4 +522,15 @@ function create_vultr_json(name, id = 403, region = 1) {
     SCRIPTID: 754163,
     VPSPLANID: id,
   };
+}
+function createUniqueGameNumber() {
+  return uuidv4();
+}
+
+function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
