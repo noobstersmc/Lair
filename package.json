@@ -6,6 +6,7 @@
   "dependencies": {
     "@vultr/vultr-node": "^1.0.1",
     "express": "^4.17.1",
+    "redis": "^3.0.2",
     "requestify": "^0.2.5"
   },
   "devDependencies": {

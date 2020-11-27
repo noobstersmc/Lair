@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const app = express();
 const requestify = require("requestify");
+const redis = require("./logic/redis")
 
 //Pterodactyl, Vultr, and PORT
 const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
@@ -23,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 //Should allow for data to be written.
 app.post("/create-server", (req, res) => {
   if (authorized(req, res)) {
-    console.log(req.body)
+    console.log(req.body);
     create_server(req, res);
   }
 });
@@ -158,7 +159,7 @@ async function create_server(request, response) {
     });
     return;
   }
-  
+
   //Create a promise to await for the vultr server to be ready.
   let creation_promise = vultr.server.create(
     create_vultr_json(
@@ -202,7 +203,6 @@ async function create_server(request, response) {
   } else {
     additional.push(server_socket_id);
   }
-  
 
   var condor_id = createUniqueGameNumber();
 
@@ -269,7 +269,7 @@ async function create_game_server_ptero(
             environment: {
               GAME_SEED: request_body.extra_data.level_seed,
               SERVER_JARFILE: "server.jar",
-              condor_id
+              condor_id,
             },
           },
           dataType: "json",
