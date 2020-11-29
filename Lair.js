@@ -2,9 +2,8 @@ const { urlencoded } = require("express");
 const express = require("express");
 const path = require("path");
 const app = express();
-const requestify = require("requestify");
-const redis = require("./logic/redis")
-
+const requestify = require("requestify");;
+const seeds = require("./logic/seeds");
 //Pterodactyl, Vultr, and PORT
 const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
 const PTERO_CLIENT = "jEe5HgYTe8hQZEx3JikPTa5RTd0Ou8hGkJWgotu1FgsMTkue";
@@ -18,6 +17,9 @@ const VultrNode = require("@vultr/vultr-node");
 const vultr = VultrNode.initialize({
   apiKey: VULTR_API,
 });
+
+const redis = require("./logic/redis")
+
 //Body parse middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -224,6 +226,7 @@ async function create_server(request, response) {
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and id ${condor_id}`
   );
 }
+
 async function create_game_server_ptero(
   request_body,
   instance_input,
@@ -231,6 +234,9 @@ async function create_game_server_ptero(
   additional,
   condor_id
 ) {
+  if (request_body.extra_data.level_seed === "random") {
+    request_body.extra_data.level_seed = seeds.getRandomSeed();
+  }
   var count = 1;
   while (count++ <= 10) {
     try {
@@ -534,3 +540,5 @@ function uuidv4() {
     return v.toString(16);
   });
 }
+console.log(seeds.getRandomSeed());
+exports.vultr = vultr;
