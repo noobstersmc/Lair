@@ -176,7 +176,7 @@ async function create_server(request, response) {
   let creation_promise = vultr.server.create(
     create_vultr_json(
       request.body.host,
-      `condor-id=${condor_id}\nlevel-seed=${request.body.extra_data.level_seed}`,
+      `condor-id=${condor_id}\nlevel-seed=${request.body.extra_data.level_seed}\n`,
       instance_input.plan_id,
       instance_input.region_id
     )
