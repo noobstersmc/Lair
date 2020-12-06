@@ -2,7 +2,7 @@ const { urlencoded } = require("express");
 const express = require("express");
 const path = require("path");
 const app = express();
-const requestify = require("requestify");;
+const requestify = require("requestify");
 const seeds = require("./logic/seeds");
 //Pterodactyl, Vultr, and PORT
 const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
@@ -18,7 +18,7 @@ const vultr = VultrNode.initialize({
   apiKey: VULTR_API,
 });
 
-const redis = require("./logic/redis")
+const redis = require("./logic/redis");
 
 //Body parse middleware
 app.use(express.json());
@@ -30,9 +30,9 @@ app.post("/create-server", (req, res) => {
     create_server(req, res);
   }
 });
-app.delete("/instance", (req, res)=>{
-  if(authorized(req, res)){
-    console.log("")
+app.delete("/instance", (req, res) => {
+  if (authorized(req, res)) {
+    console.log("");
   }
 });
 //Get call to obtain self register
@@ -167,10 +167,12 @@ async function create_server(request, response) {
     return;
   }
 
+  var condor_id = createUniqueGameNumber();
   //Create a promise to await for the vultr server to be ready.
   let creation_promise = vultr.server.create(
     create_vultr_json(
       request.body.host,
+      condor_id,
       instance_input.plan_id,
       instance_input.region_id
     )
@@ -187,46 +189,9 @@ async function create_server(request, response) {
     await sleep(1000);
     ip = await obtain_ip_from_subid(id);
   }
-  //Register the node in pterodactyl
-  var node_create = el(request, instance_input, ip);
-  let node_result = await node_create;
-
-  let body = node_result.getBody();
-  map.set(ip, body.attributes.id);
-  var update_url = body.meta.resource;
-  //Allocate the ips
-  await add_ip(update_url, ip);
-  //Create the request to
-  var get_ip_id = get_allocation_from_ip(update_url, ip, 25565);
-  var get_server_socket_ip_id = get_allocation_from_ip(update_url, ip, 8081);
-  let allocation_id = await get_ip_id;
-  let server_socket_id = await get_server_socket_ip_id;
-  let additional = [];
-  if (allocation_id == undefined) {
-    console.log(`No allocation ip found for ${ip}:25565`);
-  }
-  if (server_socket_id == undefined) {
-    console.log(`No allocation ip found for ${ip}:8081`);
-  } else {
-    additional.push(server_socket_id);
-  }
-
-  var condor_id = createUniqueGameNumber();
-
-  setTimeout(() => {
-    var game_server_promise = create_game_server_ptero(
-      request.body,
-      instance_input,
-      allocation_id,
-      additional,
-      condor_id
-    );
-    game_server_promise.then((x) => {
-      console.log(x);
-    });
-  }, 100000);
 
   response.send({ condor_id });
+
   console.log(
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and id ${condor_id}`
   );
@@ -525,13 +490,14 @@ function sleep(ms) {
   });
 }
 
-function create_vultr_json(name, id = 403, region = 1) {
+function create_vultr_json(name, game_id, id = 403, region = 1) {
   return {
     DCID: region,
     OSID: 352,
     label: name,
-    SCRIPTID: 754163,
+    SCRIPTID: 764591,
     VPSPLANID: id,
+    userdata: Buffer.from(game_id).toString("base64"),
   };
 }
 function createUniqueGameNumber() {

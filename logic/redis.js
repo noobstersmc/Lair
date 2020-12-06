@@ -1,44 +1,59 @@
 //Redis connection
 const redis = require("redis");
 const lair = require("../Lair");
+
+const pub = redis.createClient(
+  "redis://Gxb1D0sbt3VoyvICOQKC8IwakpVdWegW@redis-11764.c73.us-east-1-2.ec2.cloud.redislabs.com:11764"
+);
 const client = redis.createClient(
   "redis://Gxb1D0sbt3VoyvICOQKC8IwakpVdWegW@redis-11764.c73.us-east-1-2.ec2.cloud.redislabs.com:11764"
 );
-client.on("message", (channel, message) => {
-  let delete_request = JSON.parse(message);
-  console.log("delete request =", delete_request);
 
-  if(delete_request.provider === 'vultr'){
-
-  lair.vultr.server.list().then((response) => {
-    if(response === undefined || response.length == 0){
-      console.log(`No server found with ip ${delete_request.ip}`);
-      return;
+pub.on("message", (channel, message) => {
+  try {
+    let delete_request = JSON.parse(message);
+    console.log("delete request =", delete_request);
+  
+    if (delete_request.provider === "vultr") {
+      lair.vultr.server.list({ main_ip: delete_request.ip }).then((response) => {
+        if (response === undefined || response.length == 0) {
+          console.log(`No server found with ip ${delete_request.ip}`);
+          return;
+        }
+        for (servers in response) {
+          lair.vultr.server
+            .delete({ SUBID: parseInt(servers) })
+            .then((delete_result) => console.log("Server has been deleted.", delete_result));
+        }
+      });
+    } else {
+      console.log(`${delete_request.provider} is not supported yet.`);
     }
-    //console.log(response);
     
-    for (servers in response) {
-      let i = parseInt(servers);
-      lair.vultr.server
-        .delete({ SUBID: i })
-        .then((__) => console.log("Server has been deleted."));
-    }
+  } catch (error) {
+    console.log(error);
     
-  });
-
-  }else{
-    console.log(`${delete_request.provider} is not supported yet.`)
   }
-  /*
-  let delete_request = JSON.parse(message);
-  console.log(channel, `Asked to destroy ${JSON.stringify(message_json)}`);
-  vultr.server.list({ main_ip: delete_request.ip }).then((response) => {
-    for (servers in response) {
-      vultr.server
-        .delete({ SUBID: servers })
-        .then((__) => console.log("Server has been deleted."));
-    }
-  });*/
 });
-client.subscribe("destroy");
+pub.subscribe("destroy");
 
+async function get_from(){
+  let promise = new Promise((resolve, reject) => {
+    client.get("data:3387ec7c-9a38-4231-98a3-e032a5ea93dc", (e, data) => {
+      if(e){
+        reject(e);
+      }
+      resolve(data);
+    });
+  });
+  return await promise;
+}
+
+setTimeout(() => {
+  lair.vultr.startupScript.list().then((result)=>{
+    //console.log(result);
+  })
+  
+}, 5);
+
+exports.redisConnection = client;
