@@ -9,7 +9,7 @@ const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
 const PTERO_CLIENT = "jEe5HgYTe8hQZEx3JikPTa5RTd0Ou8hGkJWgotu1FgsMTkue";
 const PTERO_URL = "http://condor.jcedeno.us/";
 const VULTR_API = "6BVHW5PVJ53WDFIOT77GPXN2L6K4IZOI5PKQ";
-const PORT = 420;
+const PORT = 25565;
 //Map to keep track of Ips and Node IDS
 const map = new Map();
 //Vultr Api
@@ -173,10 +173,13 @@ async function create_server(request, response) {
   if (request.body.extra_data.level_seed === undefined || request.body.extra_data.level_seed === "random" ) {
     request.body.extra_data.level_seed = seeds.getRandomSeed();
   }
+  //RUN SCRIPT 764624
+  //NORMAL SCRIPT 764591
   let creation_promise = vultr.server.create(
     create_vultr_json(
       request.body.host,
       `condor-id=${condor_id}\nlevel-seed=${request.body.extra_data.level_seed}\n`,
+      get_install_script(request.body.game_type),
       instance_input.plan_id,
       instance_input.region_id
     )
@@ -199,6 +202,18 @@ async function create_server(request, response) {
   console.log(
     `Creating server for ${request.body.displayname} of type ${request.body.game_type} and id ${condor_id}`
   );
+}
+
+function get_install_script(game_type){
+  if(game_type === 'UHC'){
+    return 764591;
+  }else if(game_type === 'UHC-Run'){
+    return 764624;
+  }else{
+    //ADD MORE CASES LIKE MEETUP
+    return 764624;
+  }
+
 }
 
 async function create_game_server_ptero(
@@ -494,12 +509,12 @@ function sleep(ms) {
   });
 }
 
-function create_vultr_json(name, game_id, id = 403, region = 1) {
+function create_vultr_json(name, game_id, SCRIPTID, id = 403, region = 1) {
   return {
     DCID: region,
     OSID: 352,
     label: name,
-    SCRIPTID: 764591,
+    SCRIPTID: SCRIPTID,
     VPSPLANID: id,
     userdata: Buffer.from(game_id).toString("base64"),
   };

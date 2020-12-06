@@ -51,7 +51,7 @@ async function get_from(){
 
 setTimeout(() => {
   lair.vultr.startupScript.list().then((result)=>{
-    //console.log(result);
+    console.log(result);
   })
   
 }, 5);
