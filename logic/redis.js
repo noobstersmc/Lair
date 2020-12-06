@@ -18,10 +18,9 @@ client.on("message", (channel, message) => {
     //console.log(response);
     
     for (servers in response) {
-      console.log(servers);
-      console.log(`${servers.main_ip} ${servers.SUBID} from vultr will be destroyed (${delete_request.sender})`)
+      let i = parseInt(servers);
       lair.vultr.server
-        .delete({ SUBID: servers })
+        .delete({ SUBID: i })
         .then((__) => console.log("Server has been deleted."));
     }
     
