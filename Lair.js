@@ -169,10 +169,14 @@ async function create_server(request, response) {
 
   var condor_id = createUniqueGameNumber();
   //Create a promise to await for the vultr server to be ready.
+
+  if (request.extra_data.level_seed === undefined || request.extra_data.level_seed === "random" ) {
+    request.extra_data.level_seed = seeds.getRandomSeed();
+  }
   let creation_promise = vultr.server.create(
     create_vultr_json(
       request.body.host,
-      condor_id,
+      `condor-id=${condor_id}\nlevel-seed=${request.extra_data.level_seed}`,
       instance_input.plan_id,
       instance_input.region_id
     )
