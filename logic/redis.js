@@ -6,6 +6,30 @@ const client = redis.createClient(
 );
 client.on("message", (channel, message) => {
   let delete_request = JSON.parse(message);
+  console.log("delete request =", delete_request);
+
+  if(delete_request.provider === 'vultr'){
+
+  lair.vultr.server.list().then((response) => {
+    if(response === undefined || response.length == 0){
+      console.log(`No server found with ip ${delete_request.ip}`);
+      return;
+    }
+    console.log(response);
+    /*
+    for (servers in response) {
+      vultr.server
+        .delete({ SUBID: servers })
+        .then((__) => console.log("Server has been deleted."));
+    }
+    */
+  });
+
+  }else{
+    console.log(`${delete_request.provider} is not supported yet.`)
+  }
+  /*
+  let delete_request = JSON.parse(message);
   console.log(channel, `Asked to destroy ${JSON.stringify(message_json)}`);
   vultr.server.list({ main_ip: delete_request.ip }).then((response) => {
     for (servers in response) {
@@ -13,7 +37,7 @@ client.on("message", (channel, message) => {
         .delete({ SUBID: servers })
         .then((__) => console.log("Server has been deleted."));
     }
-  });
+  });*/
 });
 client.subscribe("destroy");
 

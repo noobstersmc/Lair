@@ -30,6 +30,11 @@ app.post("/create-server", (req, res) => {
     create_server(req, res);
   }
 });
+app.delete("/instance", (req, res)=>{
+  if(authorized(req, res)){
+    console.log("")
+  }
+});
 //Get call to obtain self register
 app.get("/self-register", (req, res) => {
   if (authorized(req, res)) {
