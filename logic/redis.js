@@ -20,6 +20,7 @@ pub.on("message", (channel, message) => {
           console.log(`No server found with ip ${delete_request.ip}`);
           return;
         }
+      
         for (servers in response) {
           lair.vultr.server
             .delete({ SUBID: parseInt(servers) })
@@ -37,9 +38,9 @@ pub.on("message", (channel, message) => {
 });
 pub.subscribe("destroy");
 
-async function get_from(){
+async function get_from(uuid){
   let promise = new Promise((resolve, reject) => {
-    client.get("data:3387ec7c-9a38-4231-98a3-e032a5ea93dc", (e, data) => {
+    client.get("request:uuid", (e, data) => {
       if(e){
         reject(e);
       }
@@ -48,12 +49,8 @@ async function get_from(){
   });
   return await promise;
 }
+async function getMatches(){
 
-setTimeout(() => {
-  lair.vultr.startupScript.list().then((result)=>{
-    console.log(result);
-  })
-  
-}, 5);
+}
 
 exports.redisConnection = client;

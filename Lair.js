@@ -170,7 +170,10 @@ async function create_server(request, response) {
   var condor_id = createUniqueGameNumber();
   //Create a promise to await for the vultr server to be ready.
 
-  if (request.body.extra_data.level_seed === undefined || request.body.extra_data.level_seed === "random" ) {
+  if (
+    request.body.extra_data.level_seed === undefined ||
+    request.body.extra_data.level_seed === "random"
+  ) {
     request.body.extra_data.level_seed = seeds.getRandomSeed();
   }
   //RUN SCRIPT 764624
@@ -204,181 +207,17 @@ async function create_server(request, response) {
   );
 }
 
-function get_install_script(game_type){
-  if(game_type === 'UHC'){
+function get_install_script(game_type) {
+  if (game_type === "UHC") {
     return 764591;
-  }else if(game_type === 'UHC-Run'){
+  } else if (game_type === "UHC-Run") {
     return 764624;
-  }else{
+  } else {
     //ADD MORE CASES LIKE MEETUP
     return 764624;
   }
-
 }
 
-async function create_game_server_ptero(
-  request_body,
-  instance_input,
-  allocation_id,
-  additional,
-  condor_id
-) {
-  if (request_body.extra_data.level_seed === "random") {
-    request_body.extra_data.level_seed = seeds.getRandomSeed();
-  }
-  var count = 1;
-  while (count++ <= 10) {
-    try {
-      let result = await requestify.request(
-        `${PTERO_URL}api/application/servers`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${PTERO_API}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: {
-            name: request_body.host,
-            user: 1,
-            egg: request_body.game_type == "UHC" ? 15 : 16,
-            docker_image: "noobstersmc/condor-graal:1.0",
-            startup:
-              "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
-            limits: {
-              memory: instance_input.ram,
-              swap: 0,
-              disk: 0,
-              cpu: 0,
-              io: 500,
-            },
-            feature_limits: {
-              databases: 0,
-              backups: 0,
-            },
-            allocation: {
-              default: allocation_id,
-              additional,
-            },
-            //ENVIRONMENT
-            environment: {
-              GAME_SEED: request_body.extra_data.level_seed,
-              SERVER_JARFILE: "server.jar",
-              condor_id,
-            },
-          },
-          dataType: "json",
-        }
-      );
-      var last_response = result.getBody();
-      var identifier = last_response.attributes.identifier;
-      start_server_when_installed(identifier);
-
-      return result;
-    } catch (error) {
-      console.log(`Error found ${count - 1}/10`);
-      console.log(error);
-    }
-    await sleep(10000);
-  }
-  return "Error: Could not create server";
-}
-
-async function start_server_when_installed(identifier) {
-  var count = 1;
-  var installed = false;
-  while (count++ <= 50) {
-    try {
-      let result = await requestify.request(
-        `${PTERO_URL}api/client/servers/${identifier}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${PTERO_CLIENT}`,
-            Accept: "application/json",
-          },
-          dataType: "json",
-        }
-      );
-      var result_body = result.getBody();
-      console.log(result_body);
-      var is_installing = result_body.attributes.is_installing;
-      if (is_installing == false) {
-        console.log("Finalized instalation...");
-        installed = true;
-        break;
-      }
-
-      await sleep(10000);
-    } catch (error) {
-      console.log(`Error trying to start ${count - 1}/30`);
-
-      await sleep(10000);
-      console.log(error);
-    }
-  }
-  if (installed) {
-    console.log("Starting the uhc server");
-    requestify
-      .request(`${PTERO_URL}api/client/servers/${identifier}/power`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${PTERO_CLIENT}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: {
-          signal: "start",
-        },
-        dataType: "json",
-      })
-      .then((result) => {
-        console.log("Request completed");
-      });
-
-    await sleep(20000);
-    requestify
-      .request(`${PTERO_URL}api/client/servers/${identifier}/command`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${PTERO_CLIENT}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: {
-          command: "worldload",
-        },
-        dataType: "json",
-      })
-      .then((result) => {
-        console.log("Sent worldload command");
-      });
-  } else {
-    console.log("Could not complete the request");
-  }
-}
-
-async function get_allocation_from_ip(node_url, from_ip, port) {
-  var promise = requestify.request(`${node_url}/allocations`, {
-    method: "GET",
-    dataType: "json",
-    headers: {
-      Authorization: `Bearer ${PTERO_API}`,
-    },
-  });
-  let result = await promise;
-  let list = result.getBody().data;
-  //Filter the allocation
-  var id = 0;
-  list.forEach((allocation) => {
-    let attributes = allocation.attributes;
-    if (attributes.ip == from_ip && attributes.port == port) {
-      console.log(`ID for ${from_ip}:${port} is ${attributes.id}`);
-      id = attributes.id;
-    }
-  });
-  return id;
-}
 async function verify_availability(response) {
   var promise = vultr.regions.availability({ DCID: response.region_id });
   var result = await promise;
@@ -451,49 +290,6 @@ function authorized(request, respone) {
     return false;
   }
   return true;
-}
-async function add_ip(url, ipv4) {
-  let promise = requestify.request(`${url}/allocations`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${PTERO_API}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: {
-      ip: ipv4,
-      ports: ["25565", "8081"],
-    },
-    dataType: "json",
-  });
-  await promise;
-  return "completed";
-}
-async function el(request, instance_input, ip) {
-  var promise = requestify.request(PTERO_URL + "api/application/nodes", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${PTERO_API}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: {
-      name: `${request.body.host}`,
-      location_id: 1,
-      fqdn: ip,
-      scheme: "http",
-      memory: instance_input.ram,
-      disk: instance_input.disk,
-      disk_overallocate: 0,
-      memory_overallocate: 0,
-      upload_size: 100,
-      daemon_sftp: 2022,
-      daemon_listen: 8080,
-    },
-    dataType: "json",
-  });
-  let result = await promise;
-  return result;
 }
 async function obtain_ip_from_subid(id) {
   var promise = vultr.server.list({
