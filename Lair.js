@@ -62,6 +62,9 @@ app.get("/vultr/servers", (req, res) => {
     console.log("Done.");
   });
 });
+app.get("/seeds", (req, res) =>{
+  res.send(seeds.getRandomSeed());
+});
 let vultr_api_url = "https://api.vultr.com/v2/";
 app.get("/vultr/servers/v2", (req, res) =>
   process_get_cv_cmd(req.query.ip, res)
