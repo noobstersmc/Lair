@@ -4,10 +4,6 @@ const path = require("path");
 const app = express();
 const requestify = require("requestify");
 const seeds = require("./logic/seeds");
-//Pterodactyl, Vultr, and PORT
-const PTERO_API = "pSMkBRPFJRxgsjzIXiHm6fuNqerVMQQQE6UOXb4BiVs8fio7";
-const PTERO_CLIENT = "jEe5HgYTe8hQZEx3JikPTa5RTd0Ou8hGkJWgotu1FgsMTkue";
-const PTERO_URL = "http://condor.jcedeno.us/";
 const VULTR_API = "6BVHW5PVJ53WDFIOT77GPXN2L6K4IZOI5PKQ";
 const PORT = 420;
 //Map to keep track of Ips and Node IDS
