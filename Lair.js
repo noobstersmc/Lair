@@ -15,6 +15,7 @@ const vultr = VultrNode.initialize({
 });
 
 const redis = require("./logic/redis");
+const twitterApi = require("./logic/twitter");
 
 //Body parse middleware
 app.use(express.json());
@@ -35,6 +36,25 @@ app.delete("/instance", (req, res) => {
 app.get("/self-register", (req, res) => {
   if (authorized(req, res)) {
     find_self_register_from_ip(req, res);
+  }
+});
+app.post("/tweet", (req, res) => {
+  if(authorized(req, res)){
+    var text = req.body.tweet;
+    if(text){
+      twitterApi.tweet(text).then((tweet_response)=>{
+
+      let user = tweet_response.user.screen_name;
+      let tweet_id = tweet_response.id_str;
+      let url_response = `https://twitter.com/${user}/status/${tweet_id}`
+      res.send({response: 200, url: url_response});
+
+      }).catch(tweet_error=>{
+        res.send(tweet_error[0]);
+      })
+    }else{
+      res.send({error: 6901, message: "No text was provided."})
+    }
   }
 });
 app.get("/vultr/sizes", (req, res) => {
@@ -58,7 +78,7 @@ app.get("/vultr/servers", (req, res) => {
     console.log("Done.");
   });
 });
-app.get("/seeds", (req, res) =>{
+app.get("/seeds", (req, res) => {
   res.send(seeds.getRandomSeed());
 });
 let vultr_api_url = "https://api.vultr.com/v2/";
