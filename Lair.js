@@ -16,6 +16,7 @@ const vultr = VultrNode.initialize({
 
 const redis = require("./logic/redis");
 const twitterApi = require("./logic/twitter");
+const { reset } = require("nodemon");
 
 //Body parse middleware
 app.use(express.json());
@@ -38,22 +39,41 @@ app.get("/self-register", (req, res) => {
     find_self_register_from_ip(req, res);
   }
 });
+app.get("/game", (req, res) => {
+  if (authorized(req, res)) {
+    redis.redisConnection.get(`data:${req.headers.condor_id}`, (err, reply) => {
+      if (err) {
+        console.error(err);
+        res.send({
+          error: err,
+        });
+      } else {
+        if (reply == null) {
+          res.send({ error: "No data" });
+        } else {
+          res.send(JSON.parse(reply));
+        }
+      }
+    });
+  }
+});
 app.post("/tweet", (req, res) => {
-  if(authorized(req, res)){
+  if (authorized(req, res)) {
     var text = req.body.tweet;
-    if(text){
-      twitterApi.tweet(text).then((tweet_response)=>{
-
-      let user = tweet_response.user.screen_name;
-      let tweet_id = tweet_response.id_str;
-      let url_response = `https://twitter.com/${user}/status/${tweet_id}`
-      res.send({response: 200, url: url_response});
-
-      }).catch(tweet_error=>{
-        res.send(tweet_error[0]);
-      })
-    }else{
-      res.send({error: 6901, message: "No text was provided."})
+    if (text) {
+      twitterApi
+        .tweet(text)
+        .then((tweet_response) => {
+          let user = tweet_response.user.screen_name;
+          let tweet_id = tweet_response.id_str;
+          let url_response = `https://twitter.com/${user}/status/${tweet_id}`;
+          res.send({ response: 200, url: url_response });
+        })
+        .catch((tweet_error) => {
+          res.send(tweet_error[0]);
+        });
+    } else {
+      res.send({ error: 6901, message: "No text was provided." });
     }
   }
 });
