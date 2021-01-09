@@ -16,7 +16,9 @@ const vultr = VultrNode.initialize({
 
 const redis = require("./logic/redis");
 const twitterApi = require("./logic/twitter");
+const mongo = require("./logic/mongo");
 const { reset } = require("nodemon");
+const MUUID = require("uuid-mongodb");
 
 //Body parse middleware
 app.use(express.json());
@@ -31,12 +33,6 @@ app.post("/create-server", (req, res) => {
 app.delete("/instance", (req, res) => {
   if (authorized(req, res)) {
     console.log("");
-  }
-});
-//Get call to obtain self register
-app.get("/self-register", (req, res) => {
-  if (authorized(req, res)) {
-    find_self_register_from_ip(req, res);
   }
 });
 app.get("/game", (req, res) => {
@@ -101,6 +97,12 @@ app.get("/vultr/servers", (req, res) => {
 app.get("/seeds", (req, res) => {
   res.send(seeds.getRandomSeed());
 });
+app.get("/register", (req, res) => {
+  let json = { _id: MUUID.from(createUniqueGameNumber()), test: "data" };
+  mongo.client.db("condor").collection("invoices").insertOne(json);
+  res.send(json);
+});
+
 let vultr_api_url = "https://api.vultr.com/v2/";
 app.get("/vultr/servers/v2", (req, res) =>
   process_get_cv_cmd(req.query.ip, res)
@@ -170,24 +172,6 @@ async function get_sizes() {
   let result = await promise;
   return result;
 }
-//Function to obtain self-register
-function find_self_register_from_ip(req, res) {
-  let body = req.body;
-  let ip = body.ip;
-  console.log(ip + " is being asked.");
-  let id = map.get(ip);
-  if (id == undefined) {
-    res.send({
-      error: 404,
-    });
-  } else {
-    res.send({
-      for_ip: ip,
-      node_id: id,
-      command: `cd /etc/pterodactyl && sudo wings configure --panel-url ${PTERO_URL} --token ${PTERO_API} --node ${id} --override`,
-    });
-  }
-}
 //Actually create the server function
 async function create_server(request, response) {
   //Validate the instance settings.
@@ -207,7 +191,6 @@ async function create_server(request, response) {
   }
 
   var condor_id = createUniqueGameNumber();
-  //Create a promise to await for the vultr server to be ready.
 
   if (
     request.body.extra_data.level_seed === undefined ||
@@ -215,6 +198,8 @@ async function create_server(request, response) {
   ) {
     request.body.extra_data.level_seed = seeds.getRandomSeed();
   }
+
+  response.send({ condor_id });
   //RUN SCRIPT 764624
   //NORMAL SCRIPT 764591
   let creation_promise = vultr.server.create(
@@ -230,19 +215,18 @@ async function create_server(request, response) {
   let creation = await creation_promise;
   //Parse the instance SUBID from vultr to an Int.
   let id = parseInt(creation.SUBID);
-  //Obtain the IP, await for it
-  var ip = await obtain_ip_from_subid(id);
-  //Loop until getting an actual response.
-  while (ip == "0.0.0.0") {
-    //execute every 1s (1000ms)
-    await sleep(1000);
-    ip = await obtain_ip_from_subid(id);
-  }
-
-  response.send({ condor_id });
+  console.log(`Vultr created SUBID: ${id}`);
+  /* Add logic to track the instances */
+  let json = {
+    _id: MUUID.from(condor_id),
+    created_at: Date.now(),
+    created_by: request.body.host_uuid,
+    request: request.body,
+  };
+  mongo.client.db("condor").collection("invoices").insertOne(json);
 
   console.log(
-    `Creating server for ${request.body.displayname} of type ${request.body.game_type} and id ${condor_id}`
+    `Created server for ${request.body.host} of type ${request.body.game_type} and id ${condor_id}`
   );
 }
 
@@ -365,5 +349,4 @@ function uuidv4() {
     return v.toString(16);
   });
 }
-console.log(seeds.getRandomSeed());
 exports.vultr = vultr;

@@ -6,9 +6,11 @@
   "dependencies": {
     "@vultr/vultr-node": "^1.0.1",
     "express": "^4.17.1",
+    "mongodb": "^3.6.3",
     "redis": "^3.0.2",
     "requestify": "^0.2.5",
-    "twitter": "^1.7.1"
+    "twitter": "^1.7.1",
+    "uuid-mongodb": "^2.4.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
