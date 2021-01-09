@@ -97,10 +97,32 @@ app.get("/vultr/servers", (req, res) => {
 app.get("/seeds", (req, res) => {
   res.send(seeds.getRandomSeed());
 });
-app.get("/register", (req, res) => {
-  let json = { _id: MUUID.from(createUniqueGameNumber()), test: "data" };
-  mongo.client.db("condor").collection("invoices").insertOne(json);
-  res.send(json);
+app.post("/invoice/close", (req, res) => {
+  mongo.client
+    .db("condor")
+    .collection("invoices")
+    .updateOne(
+      { _id: MUUID.from(req.body.condor_id) },
+      {
+        $set: {
+          destroyed_at: Date.now(),
+          destroyed_by: req.body.sender,
+        },
+      },
+      { upsert: true }
+    )
+    .then((result) => {
+      mongo.client
+        .db("condor")
+        .collection("invoices")
+        .findOne({ _id: MUUID.from(req.body.condor_id) })
+        .then((updated) => {
+          res.send({ time: updated.destroyed_at - updated.created_at });
+        });
+    })
+    .catch((err) => {
+      res.send({ error: err });
+    });
 });
 
 let vultr_api_url = "https://api.vultr.com/v2/";
