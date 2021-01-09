@@ -17,7 +17,7 @@ const vultr = VultrNode.initialize({
 const redis = require("./logic/redis");
 const twitterApi = require("./logic/twitter");
 const mongo = require("./logic/mongo");
-const { reset } = require("nodemon");
+//const { reset } = require("nodemon");
 const MUUID = require("uuid-mongodb");
 
 //Body parse middleware
@@ -35,6 +35,52 @@ app.delete("/instance", (req, res) => {
     console.log("");
   }
 });
+/*Inventory sync for UHC starts*/
+app.get("/inventories/:uuid", (req, res) => {
+  const uuid = req.params.uuid;
+  redis.redisConnection.get(`players:inventory:${uuid}`, (err, reply) => {
+    if (err) {
+      console.error(err);
+      res.send({
+        error: err,
+      });
+    } else {
+      if (reply == null) {
+        res.send({ error: "No data" });
+      } else {
+        res.json({uuid, data: JSON.parse(reply)});
+      }
+    }
+  });
+});
+app.post("/inventories/:uuid", (req, res) => {
+  try {
+    const uuid = req.params.uuid;
+    let json = req.body;
+  
+    json.creation_time = Date.now();
+    redis.redisConnection.set(
+      `players:inventory:${uuid}`,
+      JSON.stringify(json),
+      (err, reply) => {
+        if (err) {
+          console.log(err);
+          res.json({ uuid, err });
+        } else {
+          console.log(reply);
+          res.json({ uuid, reply });
+        }
+      }
+    );
+    
+  } catch (error) {
+    console.log(error);
+    
+  }
+});
+
+/* ENDS */
+
 app.get("/game", (req, res) => {
   if (authorized(req, res)) {
     redis.redisConnection.get(`data:${req.headers.condor_id}`, (err, reply) => {
