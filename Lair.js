@@ -382,8 +382,7 @@ function plan_id_from_description(plan) {
 //Auth function
 function authorized(request, respone) {
   if (request.headers.auth != "Condor-Secreto") {
-    respone.status(401);
-    respone.send({
+    respone.status(401).json({
       error: "unauthorized",
     });
     return false;
