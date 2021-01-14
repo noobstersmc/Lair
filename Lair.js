@@ -4,25 +4,28 @@ const path = require("path");
 const app = express();
 const requestify = require("requestify");
 const seeds = require("./logic/seeds");
-const VULTR_API = "6BVHW5PVJ53WDFIOT77GPXN2L6K4IZOI5PKQ";
-const PORT = 420;
-//Map to keep track of Ips and Node IDS
-const map = new Map();
+const VULTR_API = process.env.VULTR_API || "";
+const port = process.env.PORT || 420;
 //Vultr Api
 const VultrNode = require("@vultr/vultr-node");
 const vultr = VultrNode.initialize({
   apiKey: VULTR_API,
 });
+1;
 
 const redis = require("./logic/redis");
 const twitterApi = require("./logic/twitter");
 const mongo = require("./logic/mongo");
+const games = require("./logic/games");
+const logger = require("./middleware/logger");
 //const { reset } = require("nodemon");
 const MUUID = require("uuid-mongodb");
 
 //Body parse middleware
+app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/game", games);
 //Should allow for data to be written.
 app.post("/create-server", (req, res) => {
   if (authorized(req, res)) {
@@ -48,7 +51,7 @@ app.get("/inventories/:uuid", (req, res) => {
       if (reply == null) {
         res.send({ error: "No data" });
       } else {
-        res.json({uuid, data: JSON.parse(reply)});
+        res.json({ uuid, data: JSON.parse(reply) });
       }
     }
   });
@@ -57,7 +60,7 @@ app.post("/inventories/:uuid", (req, res) => {
   try {
     const uuid = req.params.uuid;
     let json = req.body;
-  
+
     json.creation_time = Date.now();
     redis.redisConnection.set(
       `players:inventory:${uuid}`,
@@ -72,10 +75,8 @@ app.post("/inventories/:uuid", (req, res) => {
         }
       }
     );
-    
   } catch (error) {
     console.log(error);
-    
   }
 });
 
@@ -233,7 +234,7 @@ function process_get_cv_cmd(ip, res) {
 }
 
 //Starts the app
-app.listen(PORT, () => console.log(`Condor landed in port ${PORT}`));
+app.listen(port, () => console.log(`Condor landed in port ${port}`));
 //Async function to get vultr available sizes
 async function get_sizes() {
   var promise = vultr.plans.list();
@@ -351,14 +352,21 @@ function verify_instance_input(instance_type, game_type) {
 }
 //Obtain plan id from description
 function region_id_from_name(region) {
-  if (region == "nyc" || region == "nj" || region == "ewr" || region == "us") {
-    return 1;
-  }
-  if (region == "tx" || region == "dfw") {
-    return 3;
-  }
-  if (region == "fr" || region == "cdg" || region == "eu") {
-    return 24;
+  switch (region.toLowerCase()) {
+    case "nyc":
+    case "nj":
+    case "ewr":
+    case "us":
+      return 1;
+    case "tx":
+    case "dfw":
+      return 3;
+    case "fr":
+    case "cdg":
+    case "eu":
+      return 24;
+    default:
+      return 1;
   }
 }
 //Obtain plan id from description
@@ -389,11 +397,6 @@ async function obtain_ip_from_subid(id) {
   let result = await promise;
   let coso = result.main_ip;
   return coso;
-}
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }
 
 function create_vultr_json(name, game_id, SCRIPTID, id = 403, region = 1) {
