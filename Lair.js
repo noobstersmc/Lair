@@ -1,6 +1,8 @@
-const { urlencoded } = require("express");
+/**
+ * Pull .env data
+ */
+require("dotenv").config();
 const express = require("express");
-const path = require("path");
 const app = express();
 const requestify = require("requestify");
 const seeds = require("./logic/seeds");

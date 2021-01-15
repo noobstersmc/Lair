@@ -1,10 +1,10 @@
 var Twitter = require("twitter");
 
 var client = new Twitter({
-  consumer_key: "jJBu4LOGaMYPR07QGZCYcKlVC",
-  consumer_secret: "AG8YbYEaDkB69O9aq9TKCl6ikfzJTVYBWu6KEGcBoRegg4Zy4u",
-  access_token_key: "1033123243400593410-2oOawFblTkFw2LnXtsymXsamefZVtp",
-  access_token_secret: "EilXjoZcVsDADdxnV1AZfinqBTpgYMzopYwoUcPxZyPDM",
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
 async function tweet(status) {

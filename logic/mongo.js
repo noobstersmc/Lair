@@ -1,12 +1,9 @@
 const { MongoClient } = require("mongodb");
-const client = new MongoClient(
-  "mongodb+srv://admin:Henixceo1!@cluster0.tpjaz.mongodb.net/admin&w=majority",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    retryWrites: true,
-  }
-);
+const client = new MongoClient(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  retryWrites: true,
+});
 
 var database;
 var collection;
