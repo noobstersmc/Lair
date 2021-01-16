@@ -13,7 +13,6 @@ const VultrNode = require("@vultr/vultr-node");
 const vultr = VultrNode.initialize({
   apiKey: VULTR_API,
 });
-1;
 
 const redis = require("./logic/redis");
 const twitterApi = require("./logic/twitter");
@@ -276,7 +275,7 @@ async function create_server(request, response) {
   let creation_promise = vultr.server.create(
     create_vultr_json(
       request.body.host,
-      `condor-id=${condor_id}\nlevel-seed=${request.body.extra_data.level_seed}\n`,
+      `condor-id=${condor_id}`,
       get_install_script(request.body.game_type),
       instance_input.plan_id,
       instance_input.region_id
