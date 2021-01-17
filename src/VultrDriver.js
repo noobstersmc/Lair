@@ -10,14 +10,13 @@ let uhc_run_url =
     "https://gist.github.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/0ad16a99b63bfb99510e65a2f1ad352313176dc3/uhc-install.sh";
 
 /**
- *
+ * Creates a server instance with the given paramters.
  * @param {*} label
+ * @param {*} tag
  * @param {*} plan
- * @param {*} script_id
+ * @param {*} install_url
  * @param {*} region
  * @param {*} os_id
- * @param {*} user_data
- * @param {*} tag
  */
 async function create_server(
   label = "condor-server",
@@ -35,22 +34,24 @@ async function create_server(
     return;
   }
 
-  let data = `#!/bin/bash \nbash -c "$(curl -fsSL ${install_url})" \nmkdir /root/server/condor \necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
+  let data = `#!/bin/bash \nbash -c "$(curl -fsSL ${
+    install_url === "uhc-run"
+      ? uhc_run_url
+      : install_url === "uhc"
+      ? uhc_url
+      : install_url
+  })" \nmkdir /root/server/condor \necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
   return await vultr.instances.createInstance({
     region,
     plan,
     os_id,
-    script_id: "6b4598e1-f5f2-4034-ax85d-09c582d90bcf",
     label,
-    tag: tag,
+    tag,
+    script_id: "6b4598e1-f5f2-4034-a85d-09c582d90bcf",
     user_data: Buffer.from(data).toString("base64"),
   });
 }
 
-async function getAllVultrInstances() {
-  let req = await vultr.instances.listInstances();
-  return req.instances;
-}
 /**
  * Deletes a server with if any one parameter is matched
  * @param {String} main_ip Optional IP to match
@@ -84,6 +85,11 @@ async function deleteServer(main_ip, id, name) {
   } else {
     return { error: "no_instance_found" };
   }
+}
+
+async function getAllVultrInstances() {
+  let req = await vultr.instances.listInstances();
+  return req.instances;
 }
 
 function uhcURL() {

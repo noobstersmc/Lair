@@ -1,10 +1,8 @@
 const router = require("express").Router();
 const lair = require("../index");
+const redis = require("../logic/redis");
 const driver = require("../src/VultrDriver");
 const { v4: uuidv4 } = require("uuid");
-const {
-  deletePrivateNetwork,
-} = require("@vultr/vultr-node/src/api/private-networks");
 
 //All routes here should be authenticated.
 router.use((req, res, next) => {
@@ -48,17 +46,48 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: "Provider not specified." });
     return;
   }
+  let game_config = creation_json.config;
+  if (!game_config || !game_config.game_type) {
+    res.status(400).json({ error: "Game type not specified." });
+    return;
+  }
   //TODO: Handle instance creation with cloud provider
-  driver.create_server(uuidv4(), "jcedeno", "vhf-2c-4gb", driver.uhcRunUrl());
+  let condor_id = uuidv4();
+
+  redis.redisConnection.set(
+    `data:${condor_id}`,
+    JSON.stringify({
+      host_uuid: creation_json.host_uuid,
+      host: creation_json.host ? creation_json.host : "Condor Game",
+      extra_data: {
+        level_seed: `${
+          game_config.level_seed ? game_config.level_seed : "random"
+        }`,
+        team_size: game_config.team_size ? game_config.team_size : 1,
+        scenarios: game_config.scenarios ? game_config.scenarios : [],
+      },
+      game_type: game_config.game_type,
+    })
+  );
+  //Call the driver for an instance.
+  let createServerRequest = await driver.createServer(
+    condor_id,
+    creation_json.host,
+    instance_provider.type ? instance_provider.type : "vhf-2c-4gb",
+    game_config.game_type.toLowerCase() === "uhc-run"
+      ? "uhc-run"
+      : game_config.game_type.toLowerCase()
+  );
   //ADD to mongo
   let instances = lair.mongo.client.db("condor").collection("instances");
   let result = await instances.insertOne({
-    game_id: uuidv4(),
+    game_id: condor_id,
     request: creation_json,
     creation: {
       time: Date.now(),
       creator: creation_json.host_uuid,
     },
+    instance: createServerRequest.instance,
   });
   console.log(result.ops[0]);
 
