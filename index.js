@@ -8,6 +8,7 @@ const app = express();
 const mongo = require("./src/databases/mongo");
 //Import routes
 const instances = require("./routes/instances");
+const bills = require("./routes/bills");
 
 //Initialize middleware
 app.use(require("./middleware/logger"));
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 
 //Initialize routes
 app.use("/instances", instances);
+app.use("/billing", bills);
 
 //Start Lair
 let port = 80; //process.env.PORT || 420;
