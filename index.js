@@ -5,7 +5,7 @@ const express = require("express");
 //Require express
 const app = express();
 //Mongo for auth
-const mongo = require("./logic/mongo");
+const mongo = require("./src/databases/mongo");
 //Import routes
 const instances = require("./routes/instances");
 

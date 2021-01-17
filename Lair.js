@@ -14,9 +14,9 @@ const vultr = VultrNode.initialize({
   apiKey: VULTR_API,
 });
 
-const redis = require("./logic/redis");
+const redis = require("./src/databases/redis");
 const twitterApi = require("./logic/twitter");
-const mongo = require("./logic/mongo");
+const mongo = require("./src/databases/mongo");
 const games = require("./logic/games");
 const logger = require("./middleware/logger");
 //const { reset } = require("nodemon");

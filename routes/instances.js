@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const lair = require("../index");
-const redis = require("../logic/redis");
+const redis = require("../src/databases/redis");
 const driver = require("../src/VultrDriver");
 const { v4: uuidv4 } = require("uuid");
 
@@ -51,10 +51,9 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: "Game type not specified." });
     return;
   }
-  //TODO: Handle instance creation with cloud provider
+  //TODO: Improve the way redis manages the data
   let condor_id = uuidv4();
-
-  redis.redisConnection.set(
+  redis.set(
     `data:${condor_id}`,
     JSON.stringify({
       host_uuid: creation_json.host_uuid,
@@ -67,6 +66,8 @@ router.post("/", async (req, res) => {
         scenarios: game_config.scenarios ? game_config.scenarios : [],
       },
       game_type: game_config.game_type,
+      private: game_config.private ? game_config.private : false,
+      whitelist: game_config.whitelist ? game_config.whitelist : "none",
     })
   );
   //Call the driver for an instance.
@@ -125,20 +126,33 @@ router.delete("/:id", async (req, res) => {
   let update_json = { deletion: { time: Date.now() } };
   //If a sender is provided, add them to the json
   if (req.query.sender) update_json.deletion.deletor = req.query.sender;
+
+  let collection = await lair.mongo.client.db("condor").collection("instances");
+  //Verify it hasn't been deleted before
+  let test_instance = await collection.findOne({ game_id: id });
+
+  //Don't keep going if server has already been marked as deleted.
+  if (
+    test_instance &&
+    test_instance.deletion &&
+    (!req.query.override || req.query.override !== "true")
+  ) {
+    res.status(409).json({ error: "Server already marked as deleted." });
+    return;
+  }
   //Find and update document
-  let instance = await lair.mongo.client
-    .db("condor")
-    .collection("instances")
-    .findOneAndUpdate(
-      { game_id: id },
-      { $set: update_json },
-      { returnOriginal: false }
-    );
+  let instance = await collection.findOneAndUpdate(
+    { game_id: id },
+    { $set: update_json },
+    { returnOriginal: false }
+  );
   if (!instance.value) {
     res.status(404).json({ error: "Instance could not be found." });
     return;
   }
-  res.json(instance.value);
+  //Return delete response.
+  res.json(await driver.deleteServer(null, null, id));
+  //TODO: Save to database however many hours were consumed.
 });
 
 //Export routes
