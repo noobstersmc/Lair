@@ -1,6 +1,10 @@
 const router = require("express").Router();
 const lair = require("../index");
+const driver = require("../src/VultrDriver");
 const { v4: uuidv4 } = require("uuid");
+const {
+  deletePrivateNetwork,
+} = require("@vultr/vultr-node/src/api/private-networks");
 
 //All routes here should be authenticated.
 router.use((req, res, next) => {
@@ -45,6 +49,8 @@ router.post("/", async (req, res) => {
     return;
   }
   //TODO: Handle instance creation with cloud provider
+  driver.create_server(uuidv4(), "jcedeno", "vhf-2c-4gb", driver.uhcRunUrl());
+  //ADD to mongo
   let instances = lair.mongo.client.db("condor").collection("instances");
   let result = await instances.insertOne({
     game_id: uuidv4(),

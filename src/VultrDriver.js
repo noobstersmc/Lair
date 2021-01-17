@@ -1,29 +1,31 @@
 //Vultr Api
 const VultrNode = require("@vultr/vultr-node");
-const { json } = require("express");
-const { func } = require("joi");
 const vultr = VultrNode.initialize({
   apiKey: "6BVHW5PVJ53WDFIOT77GPXN2L6K4IZOI5PKQ",
 });
-const { v4: uuidv4 } = require("uuid");
 
 let uhc_run_url =
     "https://gist.githubusercontent.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/0ad16a99b63bfb99510e65a2f1ad352313176dc3/uhc-run-install.sh",
   uhc_url =
     "https://gist.github.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/0ad16a99b63bfb99510e65a2f1ad352313176dc3/uhc-install.sh";
-/**
- * run script = 1bb53731-cf81-454d-991d-ead339b32849
- * uhc script = 3310f0fa-02f1-41d8-89fd-2f20d405298b
- */
 
+/**
+ *
+ * @param {*} label
+ * @param {*} plan
+ * @param {*} script_id
+ * @param {*} region
+ * @param {*} os_id
+ * @param {*} user_data
+ * @param {*} tag
+ */
 async function create_server(
   label = "condor-server",
+  tag = "condor",
   plan = "vhf-2c-4gb",
-  script_id = "3310f0fa-02f1-41d8-89fd-2f20d405298b",
+  install_url = `${uhc_url}`,
   region = "ewr",
-  os_id = "352",
-  user_data = "",
-  tag = "condor"
+  os_id = "352"
 ) {
   let available_plans = await vultr.regions.listAvailableComputeInRegion({
     "region-id": region,
@@ -33,14 +35,14 @@ async function create_server(
     return;
   }
 
-  let data = `#!/bin/bash \nbash -c "$(curl -fsSL ${uhc_run_url})" \nmkdir /root/server/condor \necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
+  let data = `#!/bin/bash \nbash -c "$(curl -fsSL ${install_url})" \nmkdir /root/server/condor \necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
   return await vultr.instances.createInstance({
     region,
     plan,
     os_id,
-    script_id,
+    script_id: "6b4598e1-f5f2-4034-ax85d-09c582d90bcf",
     label,
-    tag: "development",
+    tag: tag,
     user_data: Buffer.from(data).toString("base64"),
   });
 }
@@ -51,9 +53,9 @@ async function getAllVultrInstances() {
 }
 /**
  * Deletes a server with if any one parameter is matched
- * @param {*} main_ip Optional IP to match
- * @param {*} id Optional id to match
- * @param {*} name Optional name or label to match
+ * @param {String} main_ip Optional IP to match
+ * @param {String} id Optional id to match
+ * @param {String} name Optional name or label to match
  */
 async function deleteServer(main_ip, id, name) {
   //Ask for all the currently running instances
@@ -83,23 +85,14 @@ async function deleteServer(main_ip, id, name) {
     return { error: "no_instance_found" };
   }
 }
-async function run() {
-  //console.log(await vultr.sshKeys.listSshKeys());
 
-  console.log(
-    await create_server(
-      (label = `${uuidv4()}`),
-      (plan = "vc2-1c-2gb"),
-      (script_id = "6b4598e1-f5f2-4034-a85d-09c582d90bcf")
-    )
-  );
-  /*
-  let re = await deleteServer(
-    null,
-    null,
-    "692e2149-0952-4216-b391-c9cf61a2e317"
-  );
-  console.log(re);
-  */
+function uhcURL() {
+  return uhc_url;
 }
-run();
+function uhcRunUrl() {
+  return uhc_run_url;
+}
+exports.uhcURL = uhcURL;
+exports.uhcRunURL = uhcRunUrl;
+exports.createServer = create_server;
+exports.deleteServer = deleteServer;
