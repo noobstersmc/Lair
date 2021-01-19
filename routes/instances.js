@@ -51,6 +51,25 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: "Game type not specified." });
     return;
   }
+  let active_instances = await lair.mongo.client
+    .db("condor")
+    .collection("instances")
+    .find({ token: req.headers.authorization, deletion: { $exists: false } });
+  //Validate instance limit
+  let active_count = await active_instances.count();
+  let limit = await lair.mongo.client
+    .db("condor")
+    .collection("auth")
+    .findOne({ token: req.headers.authorization });
+
+  let amounts = { active: active_count, limit: limit.limits };
+
+  if (amounts.active >= amounts.limit) {
+    res.status(401).json({
+      error: `Max number of active instances reached (${amounts.active}) (${amounts.limit})`,
+    });
+    return;
+  }
   //TODO: Improve the way redis manages the data
   let condor_id = uuidv4();
   redis.set(
@@ -88,6 +107,7 @@ router.post("/", async (req, res) => {
       time: Date.now(),
       creator: creation_json.host_uuid,
     },
+    token: req.headers.authorization,
     instance: createServerRequest.instance,
   });
   console.log(result.ops[0]);

@@ -46,3 +46,5 @@ async function authentication(req, res) {
 
 exports.authentication = authentication;
 exports.mongo = mongo;
+
+//TODO: IMPLEMENT MISSING PATHS, BILLING AND USE AUTH TOKEN AS BILLING ID.
