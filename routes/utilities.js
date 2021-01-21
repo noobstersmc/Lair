@@ -1,9 +1,10 @@
 const router = require("express").Router();
+const redis = require("../src/databases/redis");
 const seeds = require("../logic/seeds");
 const twitter = require("../logic/twitter");
 const lair = require("../index");
 
-router.get("/seed", (req, res) => {
+router.get("/seeds", (req, res) => {
   res.send(seeds.getRandomSeed());
 });
 
@@ -27,6 +28,25 @@ router.post("/tweet", async (req, res) => {
   } else {
     res.send({ error: 6901, message: "No text was provided." });
   }
+});
+
+app.get("/game", async (req, res) => {
+  if (!(await lair.authentication(req, res))) return;
+
+  redis.get(`data:${req.query.condor_id}`, (err, reply) => {
+    if (err) {
+      console.error(err);
+      res.send({
+        error: err,
+      });
+    } else {
+      if (reply == null) {
+        res.send({ error: "No data" });
+      } else {
+        res.send(JSON.parse(reply));
+      }
+    }
+  });
 });
 
 module.exports = router;

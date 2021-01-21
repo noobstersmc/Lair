@@ -21,6 +21,7 @@ app.use("/instances", instances);
 app.use("/billing", bills);
 app.use("/utils", utils);
 
+
 //Start Lair
 let port = 80; //process.env.PORT || 420;
 app.listen(port, () => console.log(`Lair has started in port ${port}`));
