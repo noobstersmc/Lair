@@ -30,7 +30,7 @@ router.post("/tweet", async (req, res) => {
   }
 });
 
-app.get("/game", async (req, res) => {
+router.get("/game", async (req, res) => {
   if (!(await lair.authentication(req, res))) return;
 
   redis.get(`data:${req.query.condor_id}`, (err, reply) => {
