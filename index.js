@@ -10,6 +10,7 @@ const mongo = require("./src/databases/mongo");
 const instances = require("./routes/instances");
 const bills = require("./routes/bills");
 const utils = require("./routes/utilities");
+const guis = require("./routes/guis");
 
 //Initialize middleware
 app.use(require("./middleware/logger"));
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/instances", instances);
 app.use("/billing", bills);
 app.use("/utils", utils);
+app.use("/guis", guis);
 
 //Start Lair
 let PORT = process.env.PORT || 80; //process.env.PORT || 420;
