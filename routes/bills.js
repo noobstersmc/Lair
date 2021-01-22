@@ -35,15 +35,13 @@ router.get("/status", async (req, res) => {
     amounts.active = collection.length;
     //Iterate to find the uptime of each instance
     collection.forEach((instances) => {
-      let outstanding_credits = Date.now() - parseInt(instances.creation.time);
+      let outstanding_credits = Math.ceil(
+        (Date.now() - parseInt(instances.creation.time)) / 3_600_000
+      );
       //Increment the amount of outstanding credits.
       amounts.outstanding_credits += outstanding_credits;
     });
   }
-  //Set to 5 decimal point partial hours.
-  amounts.outstanding_credits = parseFloat(
-    (amounts.outstanding_credits / 3_600_000).toFixed(4)
-  );
   //Query the user's limit
   let limitQuery = await lair.mongo.client
     .db("condor")
