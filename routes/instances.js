@@ -199,7 +199,7 @@ router.delete("/:id", async (req, res) => {
   profiles.findOne({ token: id }).then((profile) => {
     if (profile.credits !== -1.0) {
       profiles
-        .updateOne({ token: id }, { $inc: { credits: cost } })
+        .updateOne({ token: id }, { $inc: { credits: cost } }, { upsert: true })
         .then((update) => {
           console.log(update);
         });
