@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const e = require("express");
 const lair = require("../index");
 
 //All routes here should be authenticated.
@@ -63,11 +62,8 @@ router.get("/:id", async (req, res) => {
 
   let bills_collection = lair.mongo.client.db("condor").collection("instances");
   let cursor = await bills_collection.find(options);
-  if ((await cursor.count()) === 0) {
-    res.status(404).json({ error: "No instances found." });
-  } else {
-    res.json({ amounts, limit, instances: await cursor.toArray() });
-  }
+
+  res.json({ amounts, limit, instances: await cursor.toArray() });
 });
 router.get("/", async (req, res) => {
   let bills_collection = lair.mongo.client.db("condor").collection("instances");
