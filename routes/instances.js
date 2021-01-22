@@ -195,7 +195,7 @@ router.delete("/:id", async (req, res) => {
   //Consume credits.
   let profiles = lair.mongo.client.db("condor").collection("auth");
   await profiles.findOneAndUpdate(
-    { token: req.headers.authorization },
+    { token: test_instance.token },
     { $inc: { credits: Math.ceil(cost) * -1 } },
     { upsert: true }
   );
