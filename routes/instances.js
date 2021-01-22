@@ -196,15 +196,11 @@ router.delete("/:id", async (req, res) => {
   );
   //Consume credits.
   let profiles = lair.mongo.client.db("condor").collection("auth");
-  profiles.findOne({ token: id }).then((profile) => {
-    if (profile.credits !== -1.0) {
-      profiles
-        .updateOne({ token: id }, { $inc: { credits: cost } }, { upsert: true })
-        .then((update) => {
-          console.log(update);
-        });
-    }
-  });
+  await profiles.findOneAndUpdate(
+    { token: req.headers.authorization },
+    { $inc: { credits: cost } },
+    { upsert: true }
+  );
 
   //Find and update document
   let instance = await collection.findOneAndUpdate(
