@@ -1,5 +1,5 @@
 //Pull enviromental variables
-require("dotenv").config();
+//require("dotenv").config();
 //Dependencies
 const express = require("express");
 //Require express
@@ -20,7 +20,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/instances", instances);
 app.use("/billing", bills);
 app.use("/utils", utils);
-
 
 //Start Lair
 let port = 80; //process.env.PORT || 420;
