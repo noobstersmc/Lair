@@ -38,6 +38,27 @@ router.post("/message", async (req, res) => {
   res.json({ result: "ok" });
 });
 
+let map = new Map();
+router.post("/request", async (req, res) => {
+  let template = makeid(6);
+  map.set(template, req.body);
+  res.json({ template_id: template });
+});
+router.get("/request", async (req, res) => {
+  res.send(map.get(req.body.template_id));
+});
+
+function makeid(length) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
 router.get("/game", async (req, res) => {
   if (!(await lair.authentication(req, res))) return;
 
