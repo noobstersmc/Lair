@@ -16,13 +16,8 @@ router.use((req, res, next) => {
     });
 });
 
-router.get("/:id", async (req, res) => {
-  let id = req.params.id;
-  if (!id || id.length < 2) {
-    res.status(400).json({ error: "No billing id provided" });
-    return;
-  }
-  var options = { token: id };
+router.get("/status", async (req, res) => {
+  var options = { token: req.headers.authorization };
 
   if (req.query && req.query.onlyActive)
     options.deletion = { $exists: req.query.onlyActive !== "true" };
@@ -32,7 +27,7 @@ router.get("/:id", async (req, res) => {
   let active_instances = await lair.mongo.client
     .db("condor")
     .collection("instances")
-    .find({ token: id, deletion: { $exists: false } });
+    .find({ token: options.token, deletion: { $exists: false } });
   //Pass it to an array
   let collection = await active_instances.toArray();
   if (collection.length > 0) {
@@ -53,7 +48,7 @@ router.get("/:id", async (req, res) => {
   let limitQuery = await lair.mongo.client
     .db("condor")
     .collection("auth")
-    .findOne({ token: id });
+    .findOne({ token: req.headers.authorization });
   //JSON limits
   let limit = {
     instance_limit: parseInt(limitQuery.instance_limit),
@@ -65,6 +60,7 @@ router.get("/:id", async (req, res) => {
 
   res.json({ amounts, limit, instances: await cursor.toArray() });
 });
+
 router.get("/", async (req, res) => {
   let bills_collection = lair.mongo.client.db("condor").collection("instances");
 
