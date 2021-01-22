@@ -11,6 +11,24 @@ router.get("/", async (req, res) => {
     .collection("auth")
     .find()
     .toArray();
+
+  let active_instances = await lair.mongo.client
+    .db("condor")
+    .collection("instances")
+    .find({ deletion: { $exists: false } })
+    .toArray();
+  active_instances.forEach((instances) => {
+    let match = profiles.find(({ token }) => token === instances.token);
+    if (match) {
+      if (!match.instances) {
+        let instances_array = new Array();
+        instances_array.push(instances);
+        match.instances = instances_array;
+      } else {
+        match.instances.push(instances);
+      }
+    }
+  });
   redis.keys("servers:*", function (err, keys) {
     if (err) {
       res.send(err.message);
