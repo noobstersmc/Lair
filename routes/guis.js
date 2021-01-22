@@ -26,7 +26,12 @@ router.get("/", async (req, res) => {
             let j = JSON.parse(server_data);
             json_info[`${j.game_id}`] = j;
           });
-          res.json({ server_data: json_info, profiles });
+
+          let tokens = {};
+          map.forEach((value, key) => {
+            tokens[key] = value;
+          });
+          res.json({ server_data: json_info, profiles, tokens });
         }
       });
     }
@@ -37,7 +42,13 @@ router.post("/token", async (req, res) => {
   let uuid = req.body.uuid;
   let token = req.body.token;
   map.set(uuid, token);
-  res.json({ map });
+
+  let jsonObject = {};
+  map.forEach((value, key) => {
+    jsonObject[key] = value;
+  });
+
+  res.send(JSON.stringify(jsonObject));
 });
 
 module.exports = router;
