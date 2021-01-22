@@ -30,6 +30,14 @@ router.post("/tweet", async (req, res) => {
   }
 });
 
+router.post("/message", async (req, res) => {
+  let result = redis.publish(
+    `${req.body.channel}`,
+    JSON.stringify(req.body.message)
+  );
+  res.json({ result: "ok" });
+});
+
 router.get("/game", async (req, res) => {
   if (!(await lair.authentication(req, res))) return;
 

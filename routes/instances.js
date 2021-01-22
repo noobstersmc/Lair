@@ -51,23 +51,50 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: "Game type not specified." });
     return;
   }
+  //Keep track of everything here
+  let amounts = { outstanding_credits: 0, active: 0 };
+  //Obtain active instances
   let active_instances = await lair.mongo.client
     .db("condor")
     .collection("instances")
     .find({ token: req.headers.authorization, deletion: { $exists: false } });
-  //Validate instance limit
-  let active_count = await active_instances.count();
-  let limit = await lair.mongo.client
+  //Pass it to an array
+  let collection = await active_instances.toArray();
+  if (collection.length > 0) {
+    //Add the amount of currently active instances.
+    amounts.active = collection.length;
+    //Iterate to find the uptime of each instance
+    collection.forEach((instances) => {
+      let outstanding_credits = Date.now() - parseInt(instances.creation.time);
+      //Increment the amount of outstanding credits.
+      amounts.outstanding_credits += outstanding_credits;
+    });
+  }
+  //Set to 5 decimal point partial hours.
+  amounts.outstanding_credits = parseFloat(
+    (amounts.outstanding_credits / 3_600_000).toFixed(4)
+  );
+  //Query the user's limit
+  let limitQuery = await lair.mongo.client
     .db("condor")
     .collection("auth")
     .findOne({ token: req.headers.authorization });
-
-  let amounts = { active: active_count, limit: limit.limits };
-
-  if (amounts.active >= amounts.limit) {
-    res.status(401).json({
-      error: `Max number of active instances reached (${amounts.active}) (${amounts.limit})`,
-    });
+  //JSON limits
+  let limit = {
+    instance_limit: parseInt(limitQuery.instance_limit),
+    credits: parseFloat(limitQuery.credits),
+  };
+  //Validate limit
+  if (limit.instance_limit != -1 && amounts.active >= limit.instance_limit) {
+    res.status(401).json({ error: "Instance limit reached", limit, amounts });
+    return;
+  }
+  //Check if balance there's balance in the account
+  let credits_left = limit.credits - amounts.outstanding_credits;
+  if (limit.credits !== -1.0 && credits_left <= 0.2) {
+    res
+      .status(401)
+      .json({ error: "Not enough credits.", credits_left, limit, amounts });
     return;
   }
   //TODO: Improve the way redis manages the data
@@ -113,7 +140,7 @@ router.post("/", async (req, res) => {
   console.log(result.ops[0]);
 
   //Respond
-  res.status(200).json(result.ops[0]);
+  res.json(result.ops[0]);
 });
 //Get specific instance
 router.get("/:id", async (req, res) => {
@@ -160,6 +187,25 @@ router.delete("/:id", async (req, res) => {
     res.status(409).json({ error: "Server already marked as deleted." });
     return;
   }
+  //Calculate how many credits have been consumed.
+  let cost = parseFloat(
+    (
+      (test_instance.creation.time - update_json.deletion.time) /
+      3_600_000
+    ).toFixed(1)
+  );
+  //Consume credits.
+  let profiles = lair.mongo.client.db("condor").collection("auth");
+  profiles.findOne({ token: id }).then((profile) => {
+    if (profile.credits !== -1.0) {
+      profiles
+        .updateOne({ token: id }, { $inc: { credits: cost } })
+        .then((update) => {
+          console.log(update);
+        });
+    }
+  });
+
   //Find and update document
   let instance = await collection.findOneAndUpdate(
     { game_id: id },
