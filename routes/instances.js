@@ -188,17 +188,13 @@ router.delete("/:id", async (req, res) => {
     return;
   }
   //Calculate how many credits have been consumed.
-  let cost = parseFloat(
-    (
-      (test_instance.creation.time - update_json.deletion.time) /
-      3_600_000
-    ).toFixed(1)
-  );
+  let cost =
+    (update_json.deletion.time - test_instance.creation.time) / 3_600_000;
   //Consume credits.
   let profiles = lair.mongo.client.db("condor").collection("auth");
   await profiles.findOneAndUpdate(
     { token: req.headers.authorization },
-    { $inc: { credits: cost } },
+    { $inc: { credits: Math.ceil(cost) * -1 } },
     { upsert: true }
   );
 
