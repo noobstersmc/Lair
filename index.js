@@ -1,5 +1,5 @@
 //Pull enviromental variables
-//require("dotenv").config();
+require("dotenv").config();
 //Dependencies
 const express = require("express");
 //Require express
@@ -22,8 +22,8 @@ app.use("/billing", bills);
 app.use("/utils", utils);
 
 //Start Lair
-let port = 80; //process.env.PORT || 420;
-app.listen(port, () => console.log(`Lair has started in port ${port}`));
+let PORT = process.env.PORT || 80; //process.env.PORT || 420;
+app.listen(PORT, () => console.log(`Lair has started in port ${PORT}`));
 
 //Authentication function
 async function authentication(req, res) {
