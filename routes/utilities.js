@@ -42,10 +42,15 @@ let map = new Map();
 router.post("/request", async (req, res) => {
   let template = makeid(6);
   map.set(template, req.body);
-  res.json({ template_id: template });
+  res.send(template);
 });
 router.get("/request", async (req, res) => {
-  res.send(map.get(req.body.template_id));
+  let config = map.get(req.query.template_id);
+  if (!config) {
+    res.send("error");
+  } else {
+    res.send(config);
+  }
 });
 
 function makeid(length) {
