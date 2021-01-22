@@ -186,6 +186,8 @@ router.delete("/:id", async (req, res) => {
   ) {
     res.status(409).json({ error: "Server already marked as deleted." });
     return;
+  } else if (!test_instance) {
+    res.status(401).json({ error: "No instance found" });
   }
   //Calculate how many credits have been consumed.
   let cost =
