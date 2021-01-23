@@ -4,6 +4,23 @@ const seeds = require("../logic/seeds");
 const twitter = require("../logic/twitter");
 const lair = require("../index");
 
+router.post("/create-token", async (req, res) => {
+  if (!(await lair.authentication(req, res))) return;
+  let request_json = req.body;
+  let json = {
+    token: request_json.token,
+    name: request_json.name,
+    credits: request_json.credits,
+    instance_limit: request_json.limit,
+  };
+
+  await lair.mongo.client
+    .db("condor")
+    .collection("auth")
+    .findOneAndUpdate({ token: request_json.token }, json, { upsert: true });
+  res.json({ result: "ok" });
+});
+
 router.get("/seeds", (req, res) => {
   res.send(seeds.getRandomSeed());
 });
