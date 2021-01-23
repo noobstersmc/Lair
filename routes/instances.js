@@ -86,7 +86,7 @@ router.post("/", async (req, res) => {
   };
   //Validate limit
   if (limit.instance_limit != -1 && amounts.active >= limit.instance_limit) {
-    res.status(401).json({ error: "Instance limit reached", limit, amounts });
+    res.status(401).json({ error: "Instance limit reached.", limit, amounts });
     return;
   }
   //Check if balance there's balance in the account

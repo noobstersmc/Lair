@@ -13,7 +13,6 @@ router.post("/create-token", async (req, res) => {
     credits: parseFloat(request_json.credits),
     instance_limit: parseInt(request_json.limit),
   };
-  
 
   await lair.mongo.client
     .db("condor")
@@ -71,6 +70,7 @@ router.get("/request", async (req, res) => {
   if (!config) {
     res.send("error");
   } else {
+    map.delete(req.query.template_id);
     res.send(config);
   }
 });
