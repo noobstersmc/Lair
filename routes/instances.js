@@ -210,6 +210,17 @@ router.delete("/:id", async (req, res) => {
     res.status(404).json({ error: "Instance could not be found." });
     return;
   }
+  if (req.query.fromBukkit) {
+    redis.publish(
+      "condor",
+      JSON.stringify({
+        type: "move",
+        source: id,
+        target: "lobby",
+        players: "@a",
+      })
+    );
+  }
   //Return delete response.
   res.json(await driver.deleteServer(null, null, id));
   //TODO: Save to database however many hours were consumed.
