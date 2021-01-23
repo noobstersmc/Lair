@@ -17,7 +17,11 @@ router.post("/create-token", async (req, res) => {
   await lair.mongo.client
     .db("condor")
     .collection("auth")
-    .findOneAndUpdate({ token: request_json.token }, json, { upsert: true });
+    .findOneAndUpdate(
+      { token: request_json.token },
+      { $set: json },
+      { upsert: true }
+    );
   res.json({ result: "ok" });
 });
 
