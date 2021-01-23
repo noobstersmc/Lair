@@ -91,7 +91,7 @@ router.post("/", async (req, res) => {
   }
   //Check if balance there's balance in the account
   let credits_left = limit.credits - amounts.outstanding_credits;
-  if (limit.credits !== -1.0 && credits_left <= 0.2) {
+  if (limit.credits !== -420.0 && credits_left <= 0.2) {
     res
       .status(401)
       .json({ error: "Not enough credits.", credits_left, limit, amounts });
@@ -195,7 +195,7 @@ router.delete("/:id", async (req, res) => {
   //Consume credits.
   let profiles = lair.mongo.client.db("condor").collection("auth");
   await profiles.findOneAndUpdate(
-    { token: test_instance.token },
+    { token: test_instance.token, credits: { $gt: -420 } },
     { $inc: { credits: Math.ceil(cost) * -1 } },
     { upsert: true }
   );
