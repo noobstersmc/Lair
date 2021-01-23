@@ -197,7 +197,7 @@ router.delete("/:id", async (req, res) => {
   await profiles.findOneAndUpdate(
     { token: test_instance.token, credits: { $gt: -420 } },
     { $inc: { credits: Math.ceil(cost) * -1 } },
-    { upsert: true }
+    { upsert: false }
   );
 
   //Find and update document
