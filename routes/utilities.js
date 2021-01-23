@@ -10,9 +10,10 @@ router.post("/create-token", async (req, res) => {
   let json = {
     token: request_json.token,
     name: request_json.name,
-    credits: request_json.credits,
-    instance_limit: request_json.limit,
+    credits: parseFloat(request_json.credits),
+    instance_limit: parseInt(request_json.limit),
   };
+  
 
   await lair.mongo.client
     .db("condor")
