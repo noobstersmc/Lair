@@ -235,7 +235,9 @@ router.delete("/:id", async (req, res) => {
                 })
               );
             }
-            await driver.deleteServer(null, null, id);
+            driver.deleteServer(null, null, id).then((result) => {
+              console.log({ result });
+            });
           }
         });
       } else {
