@@ -40,7 +40,11 @@ async function create_server(
       : install_url === "uhc"
       ? uhc_url
       : install_url
-  })" \nmkdir /root/server/condor \necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
+  })" \nmkdir /root/server/condor ${
+    tag === "Vandálico"
+      ? "\ncurl https://hynix-resources.s3.amazonaws.com/whitelist/whitelist.json >> /root/server/whitelist.json"
+      : ""
+  }\necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
   return await vultr.instances.createInstance({
     region,
     plan,

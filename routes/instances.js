@@ -99,6 +99,10 @@ router.post("/", async (req, res) => {
   }
   //TODO: Improve the way redis manages the data
   let condor_id = uuidv4();
+  if (req.headers.authorization === "vandal") {
+    game_config.whitelist =
+      "https://hynix-resources.s3.amazonaws.com/whitelist/whitelist.json";
+  }
   redis.set(
     `data:${condor_id}`,
     JSON.stringify({
@@ -119,7 +123,7 @@ router.post("/", async (req, res) => {
   //Call the driver for an instance.
   let createServerRequest = await driver.createServer(
     condor_id,
-    creation_json.host,
+    limitQuery.name,
     instance_provider.type ? instance_provider.type : "vhf-2c-4gb",
     game_config.game_type.toLowerCase() === "uhc-run"
       ? "uhc-run"
