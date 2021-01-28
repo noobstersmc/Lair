@@ -34,26 +34,39 @@ router.get("/", async (req, res) => {
       res.send(err.message);
       return;
     } else {
-      redis.mget(keys, function (err2, data) {
-        if (err2) {
-          res.send(err2);
-          return;
-        } else {
-          let json_info = {};
-          data.forEach((server_data) => {
-            let j = JSON.parse(server_data);
-            json_info[`${j.game_id}`] = j;
-          });
-
-          let tokens = {};
-          map.forEach((value, key) => {
-            tokens[key] = value;
-          });
-          res.json({ server_data: json_info, profiles, tokens });
-        }
+      let server_data = {
+        json_info: "",
+        profiles: "",
+        tokens: "",
+      };
+      let tokens = {};
+      map.forEach((value, key) => {
+        tokens[key] = value;
       });
+      server_data.tokens = tokens;
+
+      if (keys.length < 1) {
+        res.json({ server_data });
+      } else {
+        redis.mget(keys, function (err2, data) {
+          if (err2) {
+            console.error(err2);
+            return;
+          } else {
+            let json_info = {};
+            data.forEach((ins_data) => {
+              let j = JSON.parse(ins_data);
+              json_info[`${j.game_id}`] = j;
+            });
+            server_data.json_info = json_info;
+          }
+
+          res.json({ server_data });
+        });
+      }
     }
   });
+  console.log("after");
 });
 
 router.post("/token", async (req, res) => {
