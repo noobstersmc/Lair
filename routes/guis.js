@@ -29,22 +29,23 @@ router.get("/", async (req, res) => {
       }
     }
   });
+
+  let tokens = {};
+  map.forEach((value, key) => {
+    tokens[key] = value;
+  });
+
+  let server_data = {
+    profiles,
+    tokens,
+    json_info: {},
+  };
+
   redis.keys("servers:*", function (err, keys) {
     if (err) {
-      res.send(err.message);
+      res.json({ error:   err.message });
       return;
     } else {
-      let server_data = {
-        json_info: "",
-        profiles: "",
-        tokens: "",
-      };
-      let tokens = {};
-      map.forEach((value, key) => {
-        tokens[key] = value;
-      });
-      server_data.tokens = tokens;
-
       if (keys.length < 1) {
         res.json({ server_data });
       } else {
@@ -66,7 +67,6 @@ router.get("/", async (req, res) => {
       }
     }
   });
-  console.log("after");
 });
 
 router.post("/token", async (req, res) => {
