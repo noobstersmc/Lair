@@ -42,7 +42,7 @@ async function create_server(
       : install_url
   })" \nmkdir /root/server/condor ${
     tag === "Vandálico"
-      ? "\ncurl https://hynix-resources.s3.amazonaws.com/whitelist/whitelist.json >> /root/server/whitelist.json"
+      ? "\ncurl https://gist.githubusercontent.com/InfinityZ25/23c14038abc0c327ac997bf81bcf7230/raw/03e6cecbaa80b1c6f0cc82f992d9e7ba6592dc56/vandal.json >> /root/server/whitelist.json"
       : ""
   }\necho "{\\"condor_id\\": \\"${label}\\"}" >> /root/server/condor/condor.json`;
   return await vultr.instances.createInstance({
