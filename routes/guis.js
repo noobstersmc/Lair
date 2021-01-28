@@ -43,11 +43,11 @@ router.get("/", async (req, res) => {
 
   redis.keys("servers:*", function (err, keys) {
     if (err) {
-      res.json({ error:   err.message });
+      res.json({ error: err.message });
       return;
     } else {
       if (keys.length < 1) {
-        res.json({ server_data });
+        res.json(server_data);
       } else {
         redis.mget(keys, function (err2, data) {
           if (err2) {
@@ -62,7 +62,7 @@ router.get("/", async (req, res) => {
             server_data.json_info = json_info;
           }
 
-          res.json({ server_data });
+          res.json(server_data);
         });
       }
     }
