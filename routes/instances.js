@@ -256,61 +256,6 @@ router.delete("/:id", async (req, res) => {
         res.json({ error: "No error" });
       }
     });
-
-  /*
-
-  //Don't keep going if server has already been marked as deleted.
-  if (
-    test_instance &&
-    test_instance.deletion &&
-    (!req.query.override || req.query.override !== "true")
-  ) {
-    res.status(409).json({ error: "Server already marked as deleted." });
-    return;
-  } else if (!test_instance) {
-    res.status(401).json({ error: "No instance found" });
-    return;
-  } else {
-  }
-  //Calculate how many credits have been consumed.
-  let cost =
-    (update_json.deletion.time - test_instance.creation.time) / 3_600_000;
-  //Consume credits.
-  let profiles = lair.mongo.client.db("condor").collection("auth");
-  await profiles.findOneAndUpdate(
-    { token: test_instance.token, credits: { $gt: -420 } },
-    { $inc: { credits: Math.ceil(cost) * -1 } },
-    { upsert: false }
-  );
-
-  //Find and update document
-  let instance = await collection.findOneAndUpdate(
-    { game_id: id },
-    { $set: update_json },
-    { returnOriginal: false }
-  );
-  if (!instance.value) {
-    res.status(404).json({ error: "Instance could not be found." });
-    return;
-  }
-  //Return delete response.
-
-
-  if (req.query.fromBukkit) {
-    redis.publish(
-      "condor",
-      JSON.stringify({
-        type: "move",
-        source: id,
-        target: "lobby",
-        players: "@a",
-      })
-    );
-  }
-
-  res.json(await driver.deleteServer(null, null, id));
-  //TODO: Save to database however many hours were consumed.
-  */
 });
 
 //Export routes
