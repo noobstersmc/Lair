@@ -35,10 +35,12 @@ async function create_server(
   }
 
   let data = `#!/bin/bash \nbash -c "$(curl -fsSL ${
-    install_url === "uhc-run"
+    install_url.toLowerCase() === "uhc-run"
       ? uhc_run_url
-      : install_url === "uhc"
+      : install_url.toLowerCase() === "uhc"
       ? uhc_url
+      : install_url.toLowerCase() === "uhc-meetup"
+      ? uhc_run_url
       : install_url
   })" \nmkdir /root/server/condor ${
     tag === "Vandálico"
