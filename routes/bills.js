@@ -17,6 +17,11 @@ router.use((req, res, next) => {
     });
 });
 
+//Obtains all instances created by all hosts since time T
+router.get("/current-bill", async (req, res) => {
+  //TODO:Implement
+});
+
 router.get("/status", async (req, res) => {
   var options = { token: req.headers.authorization };
 
