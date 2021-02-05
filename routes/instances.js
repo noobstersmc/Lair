@@ -207,16 +207,17 @@ router.delete("/:id", async (req, res) => {
             let hours =
               (update_json.deletion.time - instance.creation.time) / 3_600_000;
             //Multiply by -1 to substract with $inc
-            let cost = Math.ceil(hours) * -1;
+            let cost = -Math.ceil(hours);
             if (profile.credits !== -420) {
               //Consume credits
+              console.log("Not unlimited credits, consuming.");
               instances
                 .findOneAndUpdate(
                   { _id: profile._id },
                   { $inc: { credits: cost } }
                 )
                 .then((final_result) => {
-                  console.log(final_result);
+                  console.log(`Updated: ${final_result}`);
                   res.json({ result: "ok", final_result });
                 })
                 .catch((final_catch) => {
@@ -240,7 +241,7 @@ router.delete("/:id", async (req, res) => {
               );
             }
             driver.deleteServer(null, null, id).then((result) => {
-              console.log({ result });
+              console.log({ deleteResult: result });
             });
           }
         });
