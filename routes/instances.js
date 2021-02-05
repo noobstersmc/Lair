@@ -213,12 +213,12 @@ router.delete("/:id", async (req, res) => {
             //Multiply by -1 to substract with $inc
             let cost = -Math.ceil(hours);
             if (profile.credits !== -420) {
-              console.log(JSON.stringify(instance));
+              console.log(JSON.stringify(instance.token));
               //Consume credits
               console.log("Not unlimited credits, consuming.");
               instances
                 .findOneAndUpdate(
-                  { _id: profile._id },
+                  { token: instance.token },
                   { $inc: { credits: cost } }
                 )
                 .then((final_result) => {
