@@ -175,9 +175,8 @@ router.delete("/:id", async (req, res) => {
   }
   //Verify authority of token.
   let token = req.headers.authorization;
-  lair.mongo.client
-    .db("condor")
-    .collection("auth")
+  let profiles_collection = lair.mongo.client.db("condor").collection("auth");
+  profiles_collection
     .findOne({ token })
     .then((doc) => {
       if (doc) {
@@ -216,13 +215,13 @@ router.delete("/:id", async (req, res) => {
               console.log(JSON.stringify(instance.token));
               //Consume credits
               console.log("Not unlimited credits, consuming.");
-              instances
+              profiles_collection
                 .findOneAndUpdate(
                   { token: instance.token },
                   { $inc: { credits: cost } }
                 )
                 .then((final_result) => {
-                  console.log(`Updated: ${final_result}`);
+                  console.log(`Updated: ${JSON.stringify(final_result)}`);
                   res.json({ result: "ok", final_result });
                 })
                 .catch((final_catch) => {
