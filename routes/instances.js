@@ -175,7 +175,10 @@ router.delete("/:id", async (req, res) => {
   }
   //Verify authority of token.
   let token = req.headers.authorization;
+
+  let instances = lair.mongo.client.db("condor").collection("instances");
   let profiles_collection = lair.mongo.client.db("condor").collection("auth");
+
   profiles_collection
     .findOne({ token })
     .then((doc) => {
@@ -187,52 +190,40 @@ router.delete("/:id", async (req, res) => {
         //If a sender is provided, add them to the json
         if (req.query.sender) update_json.deletion.deletor = req.query.sender;
         //Look for the instance
-        let instances = lair.mongo.client.db("condor").collection("instances");
         let query = { game_id: id, deletion: { $exists: false } };
         //Send the request token if not a super user.
         if (notSuperToken) query.token = token;
         let update = { $set: update_json };
         let options = { returnOriginal: false };
         //Perform querry
-
-        console.log("Got here.");
         instances.findOneAndUpdate(query, update, options, function (err, ins) {
           if (err) console.log(err);
           else if (!ins.value) {
-            console.log("Already deleted.");
             res
               .status(404)
               .json({ error: "Server not found or already deleted." });
           } else {
-            console.log("Got here 2.");
             //If server found, user is authorized to interact with the instance.
             let instance = ins.value;
             let hours =
               (update_json.deletion.time - instance.creation.time) / 3_600_000;
-            //Multiply by -1 to substract with $inc
+            //Consume the negative eq
             let cost = -Math.ceil(hours);
-            if (profile.credits !== -420) {
-              console.log(JSON.stringify(instance.token));
-              //Consume credits
-              console.log("Not unlimited credits, consuming.");
-              profiles_collection
-                .findOneAndUpdate(
-                  { token: instance.token },
-                  { $inc: { credits: cost } }
-                )
-                .then((final_result) => {
-                  console.log(`Updated: ${JSON.stringify(final_result)}`);
-                  res.json({ result: "ok", final_result });
-                })
-                .catch((final_catch) => {
-                  console.error(final_catch);
-                });
-            } else {
-              console.log("Got here 3.");
-              delete profile._id;
-              profile.credits = "Unlimited";
-              res.json({ result: "ok", profile, hours, cost, instance });
-            }
+            //Find and update the owner of the instance being deleted.
+            // $ne: -420 ensures unlimited are not consumed.
+            profiles_collection
+              .findOneAndUpdate(
+                { token: instance.token, credits: { $ne: -420 } },
+                { $inc: { credits: cost } }
+              )
+              .then((final_result) => {
+                console.log(`Updated: ${JSON.stringify(final_result)}`);
+                res.json({ result: "ok", final_result });
+              })
+              .catch((final_catch) => {
+                console.error(final_catch);
+                res.json({ final_catch });
+              });
             //Tell condor-velocity to move all players @ server to lobby.
             if (req.query.fromBukkit) {
               redis.publish(
