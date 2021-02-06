@@ -24,6 +24,15 @@ router.post("/create-token", async (req, res) => {
     );
   res.json({ result: "ok" });
 });
+router.post("/data", async (req, res) => {
+  let body = req.body;
+  if (body) {
+    redis.set(`${body.key}`, JSON.stringify(body.value));
+    res.json({ result: "Ok" });
+  } else {
+    res.json({ error: "No data provided" });
+  }
+});
 
 router.get("/seeds", (req, res) => {
   res.send(seeds.getRandomSeed());
