@@ -103,8 +103,9 @@ router.post("/", async (req, res) => {
     game_config.whitelist =
       "https://hynix-resources.s3.amazonaws.com/whitelist/whitelist.json";
   }
-  redis.set(
+  redis.setex(
     `data:${condor_id}`,
+    5 * 3600,
     JSON.stringify({
       host_uuid: creation_json.host_uuid,
       host: creation_json.host ? creation_json.host : "Condor Game",
