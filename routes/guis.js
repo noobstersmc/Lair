@@ -40,36 +40,31 @@ router.get("/", async (req, res) => {
     tokens,
     json_info: {},
   };
-  redis.get("survival", function (e1, k1) {
-    if (!e1 && k1) {
-      server_data.survival_data = JSON.parse(k1);
 
-      redis.keys("servers:*", function (err, keys) {
-        if (err) {
-          res.json({ error: err.message });
-          return;
-        } else {
-          if (keys.length < 1) {
-            res.json(server_data);
+  redis.keys("servers:*", function (err, keys) {
+    if (err) {
+      res.json({ error: err.message });
+      return;
+    } else {
+      if (keys.length < 1) {
+        res.json(server_data);
+      } else {
+        redis.mget(keys, function (err2, data) {
+          if (err2) {
+            console.error(err2);
+            return;
           } else {
-            redis.mget(keys, function (err2, data) {
-              if (err2) {
-                console.error(err2);
-                return;
-              } else {
-                let json_info = {};
-                data.forEach((ins_data) => {
-                  let j = JSON.parse(ins_data);
-                  json_info[`${j.game_id}`] = j;
-                });
-                server_data.json_info = json_info;
-              }
-
-              res.json(server_data);
+            let json_info = {};
+            data.forEach((ins_data) => {
+              let j = JSON.parse(ins_data);
+              json_info[`${j.game_id}`] = j;
             });
+            server_data.json_info = json_info;
           }
-        }
-      });
+
+          res.json(server_data);
+        });
+      }
     }
   });
 });
