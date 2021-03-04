@@ -5,9 +5,9 @@ const vultr = VultrNode.initialize({
 });
 
 let uhc_run_url =
-    "https://gist.githubusercontent.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/4d433413182c849d00bcde18428a6e94f935c550/uhc-run-install.sh",
+    "https://gist.githubusercontent.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/62d9bb6116553efdf545bb6c32e09f600a40b562/uhc-run-install.sh",
   uhc_url =
-    "https://gist.githubusercontent.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/4d433413182c849d00bcde18428a6e94f935c550/uhc-install.sh";
+    "https://gist.githubusercontent.com/InfinityZ25/747362f81193e386015fac7515304ee8/raw/62d9bb6116553efdf545bb6c32e09f600a40b562/uhc-install.sh";
 
 /**
  * Creates a server instance with the given paramters.
