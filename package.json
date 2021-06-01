@@ -6,7 +6,7 @@
   "dependencies": {
     "@vultr/vultr-node": "^2.0.0",
     "express": "^4.17.1",
-    "joi": "^17.3.0",
+    "joi": "^17.4.0",
     "moment": "^2.29.1",
     "mongodb": "^3.6.3",
     "redis": "^3.0.2",
