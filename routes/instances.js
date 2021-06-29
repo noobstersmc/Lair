@@ -45,11 +45,19 @@ router.post("/", async (req, res) => {
   if (!instance_provider) {
     res.status(400).json({ error: "Provider not specified." });
     return;
+  } /**Attempt to get rid of stuck instances */ else if (
+    instance_provider.type === "vhf-1c-2gb"
+  ) {
+    instance_provider.type = "vhf-2c-4gb";
   }
   let game_config = creation_json.config;
   if (!game_config || !game_config.game_type) {
     res.status(400).json({ error: "Game type not specified." });
     return;
+  } /**Attempt TO PATCH stuck instances */ else if (
+    game_config.game_type.toUpperCase() === "UHC-MEETUP"
+  ) {
+    game_config.game_type = "UHC-RUN";
   }
   //Keep track of everything here
   let amounts = { outstanding_credits: 0, active: 0 };
