@@ -4,7 +4,7 @@
   "description": "",
   "main": "Lair.js",
   "dependencies": {
-    "@vultr/vultr-node": "^2.0.0",
+    "@vultr/vultr-node": "^2.0.8",
     "express": "^4.17.1",
     "joi": "^17.3.0",
     "moment": "^2.29.1",
